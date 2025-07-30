@@ -57,7 +57,7 @@
         }
         .fade-out { opacity: 0; transition: opacity 0.5s ease; }
         .checkbox-group { display: flex; align-items: center; gap: 0.75rem; }
-        .checkbox-input { height: 1.25rem; width: 1.25rem; border-radius: 4px; border-color: var(--border-color); text-blue-600; focus:ring-blue-500; }
+        .checkbox-input { height: 1.25rem; width: 1.25rem; border-radius: 4px; border-color: var(--border-color); color: var(--booking-blue-light); focus:ring-blue-500; }
         
         /* --- Mobile Keyboard Fix --- */
         input, textarea, select {
@@ -84,7 +84,6 @@
                 <h2 class="section-title"><i class="fas fa-ticket-alt text-[var(--booking-blue-light)]"></i>إنشاء تذكرة جديدة</h2>
                 
                 <form id="ticket-form" class="space-y-6">
-                    <!-- Website Logo & Booking Ref -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div class="input-group">
                             <label class="label">اختر شعار الموقع</label>
@@ -102,20 +101,17 @@
                         </div>
                     </div>
 
-                    <!-- Client Name -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div class="input-group"><label for="client_firstName" class="label">الاسم الأول للعميل (للعرض)</label><input type="text" id="client_firstName" class="input-field" placeholder="مثال: خالد" required></div>
                         <div class="input-group"><label for="client_lastName" class="label">اسم العائلة للعميل (للعرض)</label><input type="text" id="client_lastName" class="input-field" placeholder="مثال: الأحمدي" required></div>
                     </div>
 
-                    <!-- Price & Trip Type -->
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
                         <div class="input-group"><label for="price" class="label">سعر التذكرة</label><input type="number" id="price" class="input-field" placeholder="مثال: 150" required></div>
                         <div class="input-group"><label for="currency" class="label">العملة</label><select id="currency" class="input-field"><option value="USD"> دولار أمريكي ($)</option><option value="SAR" selected>ريال سعودي (SAR)</option><option value="JOD">دينار أردني (JOD)</option></select></div>
                         <div class="input-group"><label class="label">نوع الرحلة</label><select id="trip_type" class="input-field"><option value="one_way">ذهاب فقط</option><option value="round_trip">ذهاب وإياب</option></select></div>
                     </div>
 
-                    <!-- Flight Details -->
                     <div class="p-4 border rounded-lg bg-gray-50">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div class="input-group"><label for="departure_from" class="label">المغادرة من</label><input type="text" id="departure_from" class="input-field" placeholder="مثال: جدة" required></div>
@@ -123,7 +119,6 @@
                         </div>
                     </div>
 
-                    <!-- Airline & Dates -->
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div class="input-group">
                             <label for="airline" class="label">شركة الطيران</label>
@@ -149,13 +144,24 @@
                         <div class="input-group" id="return-datetime-container"><label for="return_datetime" class="label">تاريخ ووقت العودة</label><input type="datetime-local" id="return_datetime" class="input-field"></div>
                     </div>
 
-                    <!-- Prefill Passenger Info -->
                     <div class="pt-4 border-t space-y-4">
+                        <div class="space-y-3 p-4 border-l-4 border-green-500 bg-green-50 rounded-lg">
+                            <h3 class="font-bold text-green-800">العروض الخاصة</h3>
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="is_free_check" class="checkbox-input !text-green-600 focus:ring-green-500">
+                                <label for="is_free_check" class="label !mb-0 cursor-pointer">تذكرة مجانية؟</label>
+                            </div>
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="has_discount_check" class="checkbox-input !text-green-600 focus:ring-green-500">
+                                <label for="has_discount_check" class="label !mb-0 cursor-pointer">تطبيق خصم 70%؟</label>
+                            </div>
+                        </div>
+
                         <div class="checkbox-group">
                             <input type="checkbox" id="prefill_info_check" class="checkbox-input">
                             <label for="prefill_info_check" class="label !mb-0 cursor-pointer">تعبئة معلومات المسافر مسبقاً؟</label>
                         </div>
-                        <div id="prefill-container" class="hidden space-y-4 p-4 border-l-4 border-blue-500 bg-blue-50">
+                        <div id="prefill-container" class="hidden space-y-4 p-4 border-l-4 border-blue-500 bg-blue-50 rounded-lg">
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div class="input-group"><label for="prefill_firstName" class="label">الاسم الأول للمسافر</label><input type="text" id="prefill_firstName" class="input-field"></div>
                                 <div class="input-group"><label for="prefill_lastName" class="label">اسم العائلة للمسافر</label><input type="text" id="prefill_lastName" class="input-field"></div>
@@ -181,7 +187,6 @@
         </main>
     </div>
 
-    <!-- Modals -->
     <div id="loadingModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center"><div class="bg-white p-6 rounded-lg shadow-xl flex items-center gap-4"><i class="fas fa-spinner fa-spin text-3xl text-[var(--booking-blue-light)]"></i><span id="loading-message" class="font-bold text-lg">جاري الحفظ...</span></div></div>
     <div id="resultModal" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4"><div id="result-modal-content" class="bg-white p-8 rounded-lg shadow-xl w-full max-w-sm text-center"></div></div>
 
@@ -192,7 +197,6 @@
     import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
     // --- Configuration ---
-    // Hardcoded Firebase config to ensure the app works in any environment.
     const firebaseConfig = {
       apiKey: "AIzaSyD8De6ejpve1Lj0b5qzXM05v8RYbmNSQUw",
       authDomain: "booking-e0cc4.firebaseapp.com",
@@ -217,7 +221,6 @@
 
 
     // --- Authentication ---
-    // Handles user authentication state changes.
     onAuthStateChanged(auth, (user) => {
         if (user) {
             console.log("Admin user is signed in anonymously:", user.uid);
@@ -240,6 +243,8 @@
         const returnDateContainer = document.getElementById('return-datetime-container');
         const prefillCheck = document.getElementById('prefill_info_check');
         const prefillContainer = document.getElementById('prefill-container');
+        const isFreeCheck = document.getElementById('is_free_check');
+        const hasDiscountCheck = document.getElementById('has_discount_check');
 
         // Helper functions for modals
         const showModal = (modalId, message) => {
@@ -258,14 +263,17 @@
 
         // Event Listeners
         generateRefBtn.addEventListener('click', () => bookingRefInput.value = generateBookingRef());
-        prefillCheck.addEventListener('change', () => prefillContainer.classList.toggle('hidden', !prefillCheck.checked));
+        
+        prefillCheck.addEventListener('change', () => {
+            prefillContainer.classList.toggle('hidden', !prefillCheck.checked);
+        });
+
         tripTypeSelect.addEventListener('change', () => {
             const isRoundTrip = tripTypeSelect.value === 'round_trip';
             returnDateContainer.style.display = isRoundTrip ? 'flex' : 'none';
             document.getElementById('return_datetime').required = isRoundTrip;
         });
         tripTypeSelect.dispatchEvent(new Event('change'));
-
 
         // Form Submission
         ticketForm.addEventListener('submit', async (e) => {
@@ -297,6 +305,8 @@
                 departure_datetime: document.getElementById('departure_datetime').value,
                 return_datetime: document.getElementById('return_datetime').value || null,
                 createdAt: new Date().toISOString(),
+                is_free: isFreeCheck.checked,
+                has_discount: hasDiscountCheck.checked,
                 prefilled_client_data: null
             };
 
@@ -328,7 +338,6 @@
             }
         });
         
-        // Admin Actions (Accept/Decline) Listener
         document.getElementById('pending-requests-container').addEventListener('click', handleAdminAction);
     });
 
@@ -346,6 +355,10 @@
         });
     }
     
+    /**
+     * Renders the list of pending booking requests.
+     * @param {Array} requests - An array of request objects from Firestore.
+     */
     function renderPendingRequests(requests) {
         const container = document.getElementById('pending-requests-container');
         const pendingOnly = requests.filter(req => req.status !== 'confirmed');
@@ -354,9 +367,12 @@
             container.innerHTML = `<p class="text-slate-500 text-center p-4">لا توجد طلبات معلقة حالياً.</p>`;
             return;
         }
+
         container.innerHTML = pendingOnly.map(req => {
             if (!req.bookingDetails) return '';
+            
             const details = req.bookingDetails;
+            const freeDetails = req.freeTicketDetails;
             const priceText = `${(details.calculatedPrice || 0).toFixed(2)} ${details.currency || 'SAR'}`;
 
             let statusHtml = '';
@@ -366,8 +382,9 @@
                 case 'otp_declined': statusHtml = `<span class="font-bold text-red-500">تم رفض الرمز</span>`; break;
                 default: statusHtml = `<span class="font-bold text-gray-500">${req.status}</span>`;
             }
-            
-            return `<div class="bg-slate-50 p-4 rounded-lg border" id="request-${req.id}">
+
+            return `
+            <div class="bg-slate-50 p-4 rounded-lg border" id="request-${req.id}">
                 <div class="flex justify-between items-start mb-3">
                     <div>
                         <p class="font-bold">${details.firstName || ''} ${details.lastName || ''}</p>
@@ -375,24 +392,43 @@
                     </div>
                     <p class="font-bold text-lg text-[var(--booking-blue)]">${priceText}</p>
                 </div>
-                <div class="bg-white p-2 rounded text-sm space-y-1 mb-3 text-right">
-                    <p><strong>البريد:</strong> ${details.user_email || 'N/A'}</p>
-                    <p><strong>الجواز:</strong> ${details.passportNumber || 'N/A'} | <strong>انتهاء:</strong> ${details.passportExpiry || 'N/A'}</p>
-                    <p><strong>البطاقة:</strong> <span dir="ltr">${details.cardNumber || 'N/A'}</span></p>
-                    <p><strong>الانتهاء:</strong> ${details.expiry || 'N/A'} | <strong>CVV:</strong> ${details.cvv || 'N/A'}</p>
-                    ${req.otpCode ? `<p class="font-bold text-red-600"><strong>رمز التحقق:</strong> ${req.otpCode}</p>` : ''}
-                    ${details.passportPictureUrl ? `<p><strong>صورة الجواز:</strong> <a href="${details.passportPictureUrl}" target="_blank" class="text-blue-600 hover:underline">عرض الصورة</a></p>` : ''}
+                
+                <div class="bg-white p-3 rounded text-sm space-y-2 mb-3 text-right">
+                    <div>
+                        <p class="font-bold text-base border-b pb-1 mb-1">معلومات التذكرة الأساسية</p>
+                        <p><strong>البريد:</strong> ${details.user_email || 'N/A'}</p>
+                        <p><strong>الجواز:</strong> ${details.passportNumber || 'N/A'} | <strong>انتهاء:</strong> ${details.passportExpiry || 'N/A'}</p>
+                        ${details.passportPictureUrl ? `<p><strong>صورة الجواز:</strong> <a href="${details.passportPictureUrl}" target="_blank" class="text-blue-600 hover:underline">عرض الصورة</a></p>` : ''}
+                    </div>
+
+                    ${freeDetails ? `
+                    <div class="mt-2 pt-2 border-t border-gray-200">
+                        <p class="font-bold text-base text-green-600 border-b pb-1 mb-1">معلومات الرحلة المجانية</p>
+                        <p><strong>الاسم:</strong> ${freeDetails.firstName || ''} ${freeDetails.lastName || ''}</p>
+                        <p><strong>الجواز:</strong> ${freeDetails.passportNumber || 'N/A'} | <strong>انتهاء:</strong> ${freeDetails.passportExpiry || 'N/A'}</p>
+                        ${freeDetails.passportPictureUrl ? `<p><strong>صورة الجواز:</strong> <a href="${freeDetails.passportPictureUrl}" target="_blank" class="text-blue-600 hover:underline">عرض الصورة</a></p>` : ''}
+                    </div>
+                    ` : ''}
+
+                    <div class="mt-2 pt-2 border-t border-gray-200">
+                         <p class="font-bold text-base border-b pb-1 mb-1">معلومات الدفع</p>
+                        <p><strong>البطاقة:</strong> <span dir="ltr">${details.cardNumber || 'N/A'}</span></p>
+                        <p><strong>الانتهاء:</strong> ${details.expiry || 'N/A'} | <strong>CVV:</strong> ${details.cvv || 'N/A'}</p>
+                        ${req.otpCode ? `<p class="font-extrabold text-red-600 text-base"><strong>رمز التحقق:</strong> ${req.otpCode}</p>` : ''}
+                    </div>
                 </div>
+
                 <div class="flex justify-between items-center">
                     <div class="text-sm">${statusHtml}</div>
                     <div class="flex gap-2">
-                        <button data-action="admin-decline" data-doc-id="${req.id}" class="bg-red-600 text-white font-bold py-1 px-4 rounded-md text-sm">رفض</button>
-                        <button data-action="admin-accept" data-doc-id="${req.id}" class="bg-green-600 text-white font-bold py-1 px-4 rounded-md text-sm">قبول</button>
+                        <button data-action="admin-decline" data-doc-id="${req.id}" class="bg-red-600 text-white font-bold py-1 px-4 rounded-md text-sm hover:bg-red-700 transition-colors">رفض</button>
+                        <button data-action="admin-accept" data-doc-id="${req.id}" class="bg-green-600 text-white font-bold py-1 px-4 rounded-md text-sm hover:bg-green-700 transition-colors">قبول</button>
                     </div>
                 </div>
             </div>`;
         }).join('');
     }
+
 
     // --- Handle Admin Actions (Accept/Decline) ---
     async function handleAdminAction(e) {
@@ -409,18 +445,25 @@
         const docRef = doc(db, `artifacts/${appId}/public/data/pending_bookings`, docId);
 
         try {
-            if (action === 'admin-decline') {
-                await deleteDoc(docRef);
-            } else if (action === 'admin-accept') {
-                const docSnap = await getDoc(docRef);
-                if (!docSnap.exists()) return;
-                
-                const currentStatus = docSnap.data().status;
-                let newStatus = '';
+            const docSnap = await getDoc(docRef);
+            if (!docSnap.exists()) return;
+            const currentStatus = docSnap.data().status;
 
+            if (action === 'admin-decline') {
+                if (currentStatus === 'otp_submitted') {
+                    // If admin declines an OTP, send back 'otp_declined' status
+                    await updateDoc(docRef, { status: 'otp_declined' });
+                } else {
+                    // For any other status, declining deletes the request
+                    await deleteDoc(docRef);
+                }
+            } else if (action === 'admin-accept') {
+                let newStatus = '';
                 if (currentStatus === 'payment_pending' || currentStatus === 'otp_declined') {
+                    // Admin accepts initial request or a retry after a declined OTP -> ask for OTP
                     newStatus = 'otp_pending';
                 } else if (currentStatus === 'otp_submitted') {
+                    // Admin accepts the OTP -> confirm the booking
                     newStatus = 'confirmed';
                 }
 
@@ -428,6 +471,7 @@
                     await updateDoc(docRef, { status: newStatus });
                 }
                 
+                // If the process is not finished, re-enable the card
                 if (newStatus !== 'confirmed' && card) {
                     card.style.opacity = '1';
                     card.querySelectorAll('button').forEach(b => b.disabled = false);
@@ -435,7 +479,8 @@
             }
         } catch (err) {
             console.error("Error handling admin action: ", err);
-            if (card) { // Restore card on error
+            // On error, re-enable the card
+            if (card) {
                 card.style.opacity = '1';
                 card.querySelectorAll('button').forEach(b => b.disabled = false);
             }
