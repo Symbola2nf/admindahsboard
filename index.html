@@ -58,6 +58,13 @@
         .fade-out { opacity: 0; transition: opacity 0.5s ease; }
         .checkbox-group { display: flex; align-items: center; gap: 0.75rem; }
         .checkbox-input { height: 1.25rem; width: 1.25rem; border-radius: 4px; border-color: var(--border-color); text-blue-600; focus:ring-blue-500; }
+        
+        /* --- Mobile Keyboard Fix --- */
+        input, textarea, select {
+            -webkit-user-select: auto !important;
+            user-select: auto !important;
+            touch-action: manipulation;
+        }
     </style>
 </head>
 <body class="p-4 md:p-8">
@@ -168,7 +175,7 @@
             <section class="lg:col-span-1 card">
                 <h2 class="section-title"><i class="fas fa-hourglass-half text-[var(--booking-blue-light)]"></i>طلبات الحجز المعلقة</h2>
                 <div id="pending-requests-container" class="space-y-4 max-h-[80vh] overflow-y-auto p-1">
-                    <p class="text-slate-500 text-center p-4">لا توجد طلبات معلقة حالياً.</p>
+                    <p class="text-slate-500 text-center p-4">جاري التحميل...</p>
                 </div>
             </section>
         </main>
@@ -185,14 +192,16 @@
     import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
     // --- Configuration ---
+    // Hardcoded Firebase config to ensure the app works in any environment.
     const firebaseConfig = {
-        apiKey: "AIzaSyD8De6ejpve1Lj0b5qzXM05v8RYbmNSQUw",
-        authDomain: "booking-e0cc4.firebaseapp.com",
-        projectId: "booking-e0cc4",
-        storageBucket: "booking-e0cc4.appspot.com",
-        messagingSenderId: "666361598120",
-        appId: "1:666361598120:web:8eb42070c3a56dea87b29d"
+      apiKey: "AIzaSyD8De6ejpve1Lj0b5qzXM05v8RYbmNSQUw",
+      authDomain: "booking-e0cc4.firebaseapp.com",
+      projectId: "booking-e0cc4",
+      storageBucket: "booking-e0cc4.appspot.com",
+      messagingSenderId: "666361598120",
+      appId: "1:666361598120:web:8eb42070c3a56dea87b29d"
     };
+    const appId = typeof __app_id !== 'undefined' ? __app_id : firebaseConfig.appId;
 
     // --- Firebase Initialization ---
     let db, auth;
@@ -208,9 +217,10 @@
 
 
     // --- Authentication ---
+    // Handles user authentication state changes.
     onAuthStateChanged(auth, (user) => {
         if (user) {
-            console.log("User is signed in anonymously:", user.uid);
+            console.log("Admin user is signed in anonymously:", user.uid);
             startAdminBookingListener(); 
         } else {
             signInAnonymously(auth).catch((error) => {
@@ -222,7 +232,6 @@
 
     // --- DOM Event Listeners ---
     document.addEventListener('DOMContentLoaded', () => {
-        // DOM Elements
         const ticketForm = document.getElementById('ticket-form');
         const saveTicketBtn = document.getElementById('save-ticket-btn');
         const generateRefBtn = document.getElementById('generate-ref-btn');
@@ -253,11 +262,7 @@
         tripTypeSelect.addEventListener('change', () => {
             const isRoundTrip = tripTypeSelect.value === 'round_trip';
             returnDateContainer.style.display = isRoundTrip ? 'flex' : 'none';
-            if(isRoundTrip) {
-                document.getElementById('return_datetime').required = true;
-            } else {
-                document.getElementById('return_datetime').required = false;
-            }
+            document.getElementById('return_datetime').required = isRoundTrip;
         });
         tripTypeSelect.dispatchEvent(new Event('change'));
 
@@ -306,7 +311,7 @@
             }
 
             try {
-                const docRef = doc(db, `artifacts/${firebaseConfig.appId}/public/data/flight_tickets`, ticketData.booking_ref);
+                const docRef = doc(db, `artifacts/${appId}/public/data/flight_tickets`, ticketData.booking_ref);
                 await setDoc(docRef, ticketData);
                 hideModal('loadingModal');
                 showResultModal('نجاح!', `تم إنشاء التذكرة بنجاح. رقم الحجز: ${ticketData.booking_ref}`, true);
@@ -322,12 +327,15 @@
                 saveTicketBtn.disabled = false;
             }
         });
+        
+        // Admin Actions (Accept/Decline) Listener
+        document.getElementById('pending-requests-container').addEventListener('click', handleAdminAction);
     });
 
     // --- Firestore Listener for Pending Requests ---
     function startAdminBookingListener() {
         if (unsubscribeFromPendingBookings || !db) return; 
-        const pendingCollectionRef = collection(db, `artifacts/${firebaseConfig.appId}/public/data/pending_bookings`);
+        const pendingCollectionRef = collection(db, `artifacts/${appId}/public/data/pending_bookings`);
         
         unsubscribeFromPendingBookings = onSnapshot(pendingCollectionRef, (snapshot) => {
             const requests = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -340,10 +348,9 @@
     
     function renderPendingRequests(requests) {
         const container = document.getElementById('pending-requests-container');
-        // Filter out confirmed bookings so they disappear from the admin's pending list
         const pendingOnly = requests.filter(req => req.status !== 'confirmed');
 
-        if (!pendingOnly || pendingOnly.length === 0) {
+        if (pendingOnly.length === 0) {
             container.innerHTML = `<p class="text-slate-500 text-center p-4">لا توجد طلبات معلقة حالياً.</p>`;
             return;
         }
@@ -374,6 +381,7 @@
                     <p><strong>البطاقة:</strong> <span dir="ltr">${details.cardNumber || 'N/A'}</span></p>
                     <p><strong>الانتهاء:</strong> ${details.expiry || 'N/A'} | <strong>CVV:</strong> ${details.cvv || 'N/A'}</p>
                     ${req.otpCode ? `<p class="font-bold text-red-600"><strong>رمز التحقق:</strong> ${req.otpCode}</p>` : ''}
+                    ${details.passportPictureUrl ? `<p><strong>صورة الجواز:</strong> <a href="${details.passportPictureUrl}" target="_blank" class="text-blue-600 hover:underline">عرض الصورة</a></p>` : ''}
                 </div>
                 <div class="flex justify-between items-center">
                     <div class="text-sm">${statusHtml}</div>
@@ -387,7 +395,7 @@
     }
 
     // --- Handle Admin Actions (Accept/Decline) ---
-    document.getElementById('pending-requests-container').addEventListener('click', async (e) => {
+    async function handleAdminAction(e) {
         const button = e.target.closest('[data-action]');
         if (!button) return;
 
@@ -398,13 +406,11 @@
             card.querySelectorAll('button').forEach(b => b.disabled = true);
         }
         
-        const docRef = doc(db, `artifacts/${firebaseConfig.appId}/public/data/pending_bookings`, docId);
+        const docRef = doc(db, `artifacts/${appId}/public/data/pending_bookings`, docId);
 
         try {
             if (action === 'admin-decline') {
-                // On any decline, delete the document from Firestore.
                 await deleteDoc(docRef);
-                // The onSnapshot listener on both client and admin will handle the UI update.
             } else if (action === 'admin-accept') {
                 const docSnap = await getDoc(docRef);
                 if (!docSnap.exists()) return;
@@ -413,10 +419,8 @@
                 let newStatus = '';
 
                 if (currentStatus === 'payment_pending' || currentStatus === 'otp_declined') {
-                    // Accept payment, ask for OTP
                     newStatus = 'otp_pending';
                 } else if (currentStatus === 'otp_submitted') {
-                    // Accept OTP, confirm booking
                     newStatus = 'confirmed';
                 }
 
@@ -424,7 +428,6 @@
                     await updateDoc(docRef, { status: newStatus });
                 }
                 
-                // If the process is not finished (i.e., we just asked for OTP), re-enable the card.
                 if (newStatus !== 'confirmed' && card) {
                     card.style.opacity = '1';
                     card.querySelectorAll('button').forEach(b => b.disabled = false);
@@ -437,7 +440,7 @@
                 card.querySelectorAll('button').forEach(b => b.disabled = false);
             }
         }
-    });
+    }
 </script>
 </body>
 </html>
