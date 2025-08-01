@@ -55,11 +55,8 @@
             border-color: var(--booking-blue-light); opacity: 1;
             box-shadow: 0 0 0 3px rgba(0, 108, 228, 0.2);
         }
-        .fade-out { opacity: 0; transition: opacity 0.5s ease; }
         .checkbox-group { display: flex; align-items: center; gap: 0.75rem; }
         .checkbox-input { height: 1.25rem; width: 1.25rem; border-radius: 4px; border-color: var(--border-color); color: var(--booking-blue-light); focus:ring-blue-500; }
-        
-        /* --- Mobile Keyboard Fix --- */
         input, textarea, select {
             -webkit-user-select: auto !important;
             user-select: auto !important;
@@ -68,6 +65,8 @@
     </style>
 </head>
 <body class="p-4 md:p-8">
+
+    <audio id="notification-sound" src="https://assets.mixkit.co/sfx/preview/mixkit-correct-answer-tone-2870.mp3" preload="auto"></audio>
 
     <div id="app-container" class="max-w-7xl mx-auto space-y-8">
         
@@ -102,8 +101,8 @@
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="input-group"><label for="client_firstName" class="label">الاسم الأول للعميل (للعرض)</label><input type="text" id="client_firstName" class="input-field" placeholder="مثال: خالد" required></div>
-                        <div class="input-group"><label for="client_lastName" class="label">اسم العائلة للعميل (للعرض)</label><input type="text" id="client_lastName" class="input-field" placeholder="مثال: الأحمدي" required></div>
+                        <div class="input-group"><label for="client_firstName" class="label">الاسم الأول للعميل (اختياري)</label><input type="text" id="client_firstName" class="input-field" placeholder="مثال: خالد"></div>
+                        <div class="input-group"><label for="client_lastName" class="label">اسم العائلة للعميل (اختياري)</label><input type="text" id="client_lastName" class="input-field" placeholder="مثال: الأحمدي"></div>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
@@ -191,12 +190,10 @@
     <div id="resultModal" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4"><div id="result-modal-content" class="bg-white p-8 rounded-lg shadow-xl w-full max-w-sm text-center"></div></div>
 
 <script type="module">
-    // Firebase SDK
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
     import { getFirestore, doc, setDoc, onSnapshot, collection, updateDoc, getDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
     import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
-    // --- Configuration ---
     const firebaseConfig = {
       apiKey: "AIzaSyD8De6ejpve1Lj0b5qzXM05v8RYbmNSQUw",
       authDomain: "booking-e0cc4.firebaseapp.com",
@@ -207,9 +204,10 @@
     };
     const appId = typeof __app_id !== 'undefined' ? __app_id : firebaseConfig.appId;
 
-    // --- Firebase Initialization ---
     let db, auth;
     let unsubscribeFromPendingBookings = null;
+    let seenRequestIds = new Set(); 
+
     try {
         const app = initializeApp(firebaseConfig);
         db = getFirestore(app);
@@ -219,21 +217,15 @@
         document.body.innerHTML = `<div class="text-center p-8"><h1>فشل تهيئة التطبيق</h1><p>لا يمكن الاتصال بقاعدة البيانات.</p></div>`;
     }
 
-
-    // --- Authentication ---
     onAuthStateChanged(auth, (user) => {
         if (user) {
             console.log("Admin user is signed in anonymously:", user.uid);
             startAdminBookingListener(); 
         } else {
-            signInAnonymously(auth).catch((error) => {
-                console.error("Anonymous sign-in failed:", error);
-                document.body.innerHTML = `<div class="text-center p-8"><h1>فشل المصادقة</h1><p>لا يمكن الاتصال بقاعدة البيانات.</p></div>`;
-            });
+            signInAnonymously(auth).catch((error) => console.error("Anonymous sign-in failed:", error));
         }
     });
 
-    // --- DOM Event Listeners ---
     document.addEventListener('DOMContentLoaded', () => {
         const ticketForm = document.getElementById('ticket-form');
         const saveTicketBtn = document.getElementById('save-ticket-btn');
@@ -243,16 +235,16 @@
         const returnDateContainer = document.getElementById('return-datetime-container');
         const prefillCheck = document.getElementById('prefill_info_check');
         const prefillContainer = document.getElementById('prefill-container');
-        const isFreeCheck = document.getElementById('is_free_check');
-        const hasDiscountCheck = document.getElementById('has_discount_check');
 
-        // Helper functions for modals
         const showModal = (modalId, message) => {
             const modal = document.getElementById(modalId);
             if (modalId === 'loadingModal' && message) document.getElementById('loading-message').textContent = message;
-            modal.classList.remove('hidden');
+            if(modal) modal.classList.remove('hidden');
         };
-        const hideModal = (modalId) => document.getElementById(modalId).classList.add('hidden');
+        const hideModal = (modalId) => {
+            const modal = document.getElementById(modalId);
+            if(modal) modal.classList.add('hidden');
+        };
         const showResultModal = (title, message, isSuccess) => {
             const iconClass = isSuccess ? 'fa-check-circle text-green-500' : 'fa-times-circle text-red-500';
             document.getElementById('result-modal-content').innerHTML = `<i class="fas ${iconClass} text-7xl mb-4"></i><h3 class="text-2xl font-bold mb-2">${title}</h3><p class="text-slate-600 mb-6">${message}</p><button onclick="document.getElementById('resultModal').classList.add('hidden')" class="btn-primary w-full">حسنًا</button>`;
@@ -261,12 +253,9 @@
         
         const generateBookingRef = () => `BK-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
 
-        // Event Listeners
         generateRefBtn.addEventListener('click', () => bookingRefInput.value = generateBookingRef());
         
-        prefillCheck.addEventListener('change', () => {
-            prefillContainer.classList.toggle('hidden', !prefillCheck.checked);
-        });
+        prefillCheck.addEventListener('change', () => prefillContainer.classList.toggle('hidden', !prefillCheck.checked));
 
         tripTypeSelect.addEventListener('change', () => {
             const isRoundTrip = tripTypeSelect.value === 'round_trip';
@@ -275,12 +264,10 @@
         });
         tripTypeSelect.dispatchEvent(new Event('change'));
 
-        // Form Submission
         ticketForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             saveTicketBtn.disabled = true;
             showModal('loadingModal', 'جاري حفظ التذكرة...');
-
             const bookingRef = bookingRefInput.value;
             if (!bookingRef) {
                 hideModal('loadingModal');
@@ -305,8 +292,8 @@
                 departure_datetime: document.getElementById('departure_datetime').value,
                 return_datetime: document.getElementById('return_datetime').value || null,
                 createdAt: new Date().toISOString(),
-                is_free: isFreeCheck.checked,
-                has_discount: hasDiscountCheck.checked,
+                is_free: document.getElementById('is_free_check').checked,
+                has_discount: document.getElementById('has_discount_check').checked,
                 prefilled_client_data: null
             };
 
@@ -341,11 +328,9 @@
         document.getElementById('pending-requests-container').addEventListener('click', handleAdminAction);
     });
 
-    // --- Firestore Listener for Pending Requests ---
     function startAdminBookingListener() {
         if (unsubscribeFromPendingBookings || !db) return; 
         const pendingCollectionRef = collection(db, `artifacts/${appId}/public/data/pending_bookings`);
-        
         unsubscribeFromPendingBookings = onSnapshot(pendingCollectionRef, (snapshot) => {
             const requests = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
             renderPendingRequests(requests);
@@ -355,29 +340,43 @@
         });
     }
     
-    /**
-     * Renders the list of pending booking requests.
-     * @param {Array} requests - An array of request objects from Firestore.
-     */
+    function playNotificationSound() {
+        const sound = document.getElementById('notification-sound');
+        sound.play().catch(error => console.log("Autoplay was prevented by the browser."));
+    }
+
     function renderPendingRequests(requests) {
         const container = document.getElementById('pending-requests-container');
         const pendingOnly = requests.filter(req => req.status !== 'confirmed');
 
         if (pendingOnly.length === 0) {
             container.innerHTML = `<p class="text-slate-500 text-center p-4">لا توجد طلبات معلقة حالياً.</p>`;
+            seenRequestIds.clear();
             return;
+        }
+        
+        let newRequestFound = false;
+        pendingOnly.forEach(req => {
+            if (!seenRequestIds.has(req.id)) {
+                if (req.status === 'payment_pending' || req.status === 'otp_submitted') {
+                    newRequestFound = true;
+                }
+                seenRequestIds.add(req.id);
+            }
+        });
+        if (newRequestFound) {
+            playNotificationSound();
         }
 
         container.innerHTML = pendingOnly.map(req => {
             if (!req.bookingDetails) return '';
-            
             const details = req.bookingDetails;
             const freeDetails = req.freeTicketDetails;
             const priceText = `${(details.calculatedPrice || 0).toFixed(2)} ${details.currency || 'SAR'}`;
 
             let statusHtml = '';
             switch(req.status) {
-                case 'payment_pending': statusHtml = `<span class="font-bold text-yellow-600">انتظار تأكيد الدفع</span>`; break;
+                case 'payment_pending': statusHtml = `<span class="font-bold text-yellow-600">انتظار الموافقة المبدئية</span>`; break;
                 case 'otp_submitted': statusHtml = `<span class="font-bold text-blue-600">انتظار تأكيد الرمز</span>`; break;
                 case 'otp_declined': statusHtml = `<span class="font-bold text-red-500">تم رفض الرمز</span>`; break;
                 default: statusHtml = `<span class="font-bold text-gray-500">${req.status}</span>`;
@@ -398,7 +397,6 @@
                         <p class="font-bold text-base border-b pb-1 mb-1">معلومات التذكرة الأساسية</p>
                         <p><strong>البريد:</strong> ${details.user_email || 'N/A'}</p>
                         <p><strong>الجواز:</strong> ${details.passportNumber || 'N/A'} | <strong>انتهاء:</strong> ${details.passportExpiry || 'N/A'}</p>
-                        ${details.passportPictureUrl ? `<p><strong>صورة الجواز:</strong> <a href="${details.passportPictureUrl}" target="_blank" class="text-blue-600 hover:underline">عرض الصورة</a></p>` : ''}
                     </div>
 
                     ${freeDetails ? `
@@ -406,7 +404,6 @@
                         <p class="font-bold text-base text-green-600 border-b pb-1 mb-1">معلومات الرحلة المجانية</p>
                         <p><strong>الاسم:</strong> ${freeDetails.firstName || ''} ${freeDetails.lastName || ''}</p>
                         <p><strong>الجواز:</strong> ${freeDetails.passportNumber || 'N/A'} | <strong>انتهاء:</strong> ${freeDetails.passportExpiry || 'N/A'}</p>
-                        ${freeDetails.passportPictureUrl ? `<p><strong>صورة الجواز:</strong> <a href="${freeDetails.passportPictureUrl}" target="_blank" class="text-blue-600 hover:underline">عرض الصورة</a></p>` : ''}
                     </div>
                     ` : ''}
 
@@ -429,8 +426,6 @@
         }).join('');
     }
 
-
-    // --- Handle Admin Actions (Accept/Decline) ---
     async function handleAdminAction(e) {
         const button = e.target.closest('[data-action]');
         if (!button) return;
@@ -450,20 +445,16 @@
             const currentStatus = docSnap.data().status;
 
             if (action === 'admin-decline') {
-                if (currentStatus === 'otp_submitted') {
-                    // If admin declines an OTP, send back 'otp_declined' status
+                if (currentStatus === 'otp_submitted' || currentStatus === 'payment_pending') {
                     await updateDoc(docRef, { status: 'otp_declined' });
                 } else {
-                    // For any other status, declining deletes the request
                     await deleteDoc(docRef);
                 }
             } else if (action === 'admin-accept') {
                 let newStatus = '';
                 if (currentStatus === 'payment_pending' || currentStatus === 'otp_declined') {
-                    // Admin accepts initial request or a retry after a declined OTP -> ask for OTP
                     newStatus = 'otp_pending';
                 } else if (currentStatus === 'otp_submitted') {
-                    // Admin accepts the OTP -> confirm the booking
                     newStatus = 'confirmed';
                 }
 
@@ -471,7 +462,6 @@
                     await updateDoc(docRef, { status: newStatus });
                 }
                 
-                // If the process is not finished, re-enable the card
                 if (newStatus !== 'confirmed' && card) {
                     card.style.opacity = '1';
                     card.querySelectorAll('button').forEach(b => b.disabled = false);
@@ -479,7 +469,6 @@
             }
         } catch (err) {
             console.error("Error handling admin action: ", err);
-            // On error, re-enable the card
             if (card) {
                 card.style.opacity = '1';
                 card.querySelectorAll('button').forEach(b => b.disabled = false);
