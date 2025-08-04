@@ -83,6 +83,7 @@
                 <h2 class="section-title"><i class="fas fa-ticket-alt text-[var(--booking-blue-light)]"></i>إنشاء تذكرة جديدة</h2>
                 
                 <form id="ticket-form" class="space-y-6">
+                    <!-- General Ticket Info -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div class="input-group">
                             <label class="label">اختر شعار الموقع</label>
@@ -99,25 +100,21 @@
                             <button type="button" id="generate-ref-btn" class="text-sm text-[var(--booking-blue-light)] font-bold self-start mt-1">إنشاء رقم جديد</button>
                         </div>
                     </div>
-
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div class="input-group"><label for="client_firstName" class="label">الاسم الأول للعميل (اختياري)</label><input type="text" id="client_firstName" class="input-field" placeholder="مثال: خالد"></div>
                         <div class="input-group"><label for="client_lastName" class="label">اسم العائلة للعميل (اختياري)</label><input type="text" id="client_lastName" class="input-field" placeholder="مثال: الأحمدي"></div>
                     </div>
-
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
                         <div class="input-group"><label for="price" class="label">سعر التذكرة</label><input type="number" id="price" class="input-field" placeholder="مثال: 150" required></div>
                         <div class="input-group"><label for="currency" class="label">العملة</label><select id="currency" class="input-field"><option value="USD"> دولار أمريكي ($)</option><option value="SAR" selected>ريال سعودي (SAR)</option><option value="JOD">دينار أردني (JOD)</option></select></div>
                         <div class="input-group"><label class="label">نوع الرحلة</label><select id="trip_type" class="input-field"><option value="one_way">ذهاب فقط</option><option value="round_trip">ذهاب وإياب</option></select></div>
                     </div>
-
                     <div class="p-4 border rounded-lg bg-gray-50">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div class="input-group"><label for="departure_from" class="label">المغادرة من</label><input type="text" id="departure_from" class="input-field" placeholder="مثال: جدة" required></div>
                             <div class="input-group"><label for="arrival_to" class="label">الوصول إلى</label><input type="text" id="arrival_to" class="input-field" placeholder="مثال: دبي" required></div>
                         </div>
                     </div>
-
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div class="input-group">
                             <label for="airline" class="label">شركة الطيران</label>
@@ -142,12 +139,12 @@
                         <div class="input-group"><label for="departure_datetime" class="label">تاريخ ووقت المغادرة</label><input type="datetime-local" id="departure_datetime" class="input-field" required></div>
                         <div class="input-group" id="return-datetime-container"><label for="return_datetime" class="label">تاريخ ووقت العودة</label><input type="datetime-local" id="return_datetime" class="input-field"></div>
                     </div>
-
                     <div class="input-group">
                         <label for="flight_number" class="label">رقم الرحلة (اختياري)</label>
                         <input type="text" id="flight_number" class="input-field" placeholder="مثال: SV590">
                     </div>
 
+                    <!-- Special Offers & Prefill Section -->
                     <div class="pt-4 border-t space-y-4">
                         <div class="space-y-3 p-4 border-l-4 border-green-500 bg-green-50 rounded-lg">
                             <h3 class="font-bold text-green-800">العروض الخاصة</h3>
@@ -155,7 +152,30 @@
                                 <input type="checkbox" id="is_free_check" class="checkbox-input !text-green-600 focus:ring-green-500">
                                 <label for="is_free_check" class="label !mb-0 cursor-pointer">تضمين عرض التذكرة المجانية؟</label>
                             </div>
-                            <div class="checkbox-group">
+                            
+                            <!-- NEW CONTAINER FOR FREE TICKET PREFILL -->
+                            <div id="free-ticket-prefill-container" class="hidden space-y-4 pt-4 mt-4 border-t border-green-200">
+                                <h4 class="font-semibold text-green-900">تعبئة بيانات التذكرة المجانية مسبقاً (اختياري)</h4>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div class="input-group"><label for="prefill_free_departure_from" class="label">المغادرة من</label><input type="text" id="prefill_free_departure_from" class="input-field bg-white"></div>
+                                    <div class="input-group"><label for="prefill_free_arrival_to" class="label">الوصول إلى</label><input type="text" id="prefill_free_arrival_to" class="input-field bg-white"></div>
+                                </div>
+                                <div class="input-group"><label for="prefill_free_airline" class="label">شركة الطيران</label><select id="prefill_free_airline" class="input-field bg-white"></select></div>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div class="input-group"><label for="prefill_free_firstName" class="label">الاسم الأول</label><input type="text" id="prefill_free_firstName" class="input-field bg-white"></div>
+                                    <div class="input-group"><label for="prefill_free_lastName" class="label">اسم العائلة</label><input type="text" id="prefill_free_lastName" class="input-field bg-white"></div>
+                                </div>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div class="input-group"><label for="prefill_free_passportNumber" class="label">رقم الجواز</label><input type="text" id="prefill_free_passportNumber" class="input-field bg-white"></div>
+                                    <div class="input-group"><label for="prefill_free_passportExpiry" class="label">انتهاء الجواز</label><input type="date" id="prefill_free_passportExpiry" class="input-field bg-white"></div>
+                                </div>
+                                <div class="checkbox-group">
+                                    <input type="checkbox" id="prefill_free_passport_provided_check" class="checkbox-input">
+                                    <label for="prefill_free_passport_provided_check" class="label !mb-0 cursor-pointer">صورة جواز السفر متوفرة (لا تطلب من العميل)</label>
+                                </div>
+                            </div>
+                            
+                            <div class="checkbox-group pt-3">
                                 <input type="checkbox" id="has_discount_check" class="checkbox-input !text-green-600 focus:ring-green-500">
                                 <label for="has_discount_check" class="label !mb-0 cursor-pointer">تطبيق خصم 70%؟</label>
                             </div>
@@ -240,6 +260,10 @@
                     <div class="input-group"><label for="prefill_passportNumber_${index}" class="label">رقم الجواز</label><input type="text" id="prefill_passportNumber_${index}" data-field="passportNumber" class="input-field"></div>
                     <div class="input-group"><label for="prefill_passportExpiry_${index}" class="label">انتهاء الجواز</label><input type="date" id="prefill_passportExpiry_${index}" data-field="passportExpiry" class="input-field"></div>
                 </div>
+                <div class="checkbox-group pt-2">
+                    <input type="checkbox" id="prefill_passport_provided_${index}" data-field="passport_picture_provided" class="checkbox-input">
+                    <label for="prefill_passport_provided_${index}" class="label !mb-0 cursor-pointer text-sm">صورة جواز السفر متوفرة (لا تطلب من العميل)</label>
+                </div>
             </div>`;
     };
 
@@ -251,6 +275,13 @@
             container.innerHTML += generatePassengerForm(i);
         }
     };
+    
+    const populateFreeAirlineSelect = () => {
+        const airlineSelect = document.getElementById('prefill_free_airline');
+        const mainAirlineSelect = document.getElementById('airline');
+        if (!airlineSelect || !mainAirlineSelect) return;
+        airlineSelect.innerHTML = mainAirlineSelect.innerHTML;
+    };
 
     document.addEventListener('DOMContentLoaded', () => {
         const ticketForm = document.getElementById('ticket-form');
@@ -260,6 +291,8 @@
         const tripTypeSelect = document.getElementById('trip_type');
         const returnDateContainer = document.getElementById('return-datetime-container');
         const passengerCountInput = document.getElementById('passenger_count');
+        const isFreeCheck = document.getElementById('is_free_check');
+        const freeTicketPrefillContainer = document.getElementById('free-ticket-prefill-container');
 
         const showModal = (modalId, message) => {
             const modal = document.getElementById(modalId);
@@ -281,7 +314,12 @@
         generateRefBtn.addEventListener('click', () => bookingRefInput.value = generateBookingRef());
         
         passengerCountInput.addEventListener('input', updatePassengerForms);
-        updatePassengerForms(); // Initial call
+        updatePassengerForms();
+
+        isFreeCheck.addEventListener('change', () => {
+            freeTicketPrefillContainer.classList.toggle('hidden', !isFreeCheck.checked);
+        });
+        populateFreeAirlineSelect();
 
         tripTypeSelect.addEventListener('change', () => {
             const isRoundTrip = tripTypeSelect.value === 'round_trip';
@@ -305,13 +343,32 @@
             const airlineSelect = document.getElementById('airline');
             
             const passengersData = [];
-            document.querySelectorAll('.passenger-form-entry').forEach((form, index) => {
+            document.querySelectorAll('.passenger-form-entry').forEach((form) => {
                 const passenger = {};
-                form.querySelectorAll('.input-field').forEach(input => {
-                    passenger[input.dataset.field] = input.value;
+                form.querySelectorAll('input, select').forEach(input => {
+                    const field = input.dataset.field;
+                    if (input.type === 'checkbox') {
+                        passenger[field] = input.checked;
+                    } else {
+                        passenger[field] = input.value;
+                    }
                 });
                 passengersData.push(passenger);
             });
+
+            let prefilledFreeTicketData = null;
+            if (isFreeCheck.checked) {
+                prefilledFreeTicketData = {
+                    departure_from: document.getElementById('prefill_free_departure_from').value,
+                    arrival_to: document.getElementById('prefill_free_arrival_to').value,
+                    airline: document.getElementById('prefill_free_airline').value,
+                    firstName: document.getElementById('prefill_free_firstName').value,
+                    lastName: document.getElementById('prefill_free_lastName').value,
+                    passportNumber: document.getElementById('prefill_free_passportNumber').value,
+                    passportExpiry: document.getElementById('prefill_free_passportExpiry').value,
+                    passport_picture_provided: document.getElementById('prefill_free_passport_provided_check').checked
+                };
+            }
 
             const ticketData = {
                 booking_ref: bookingRef,
@@ -331,7 +388,8 @@
                 createdAt: new Date().toISOString(),
                 is_free: document.getElementById('is_free_check').checked,
                 has_discount: document.getElementById('has_discount_check').checked,
-                passengers: passengersData
+                passengers: passengersData,
+                prefilled_free_ticket_data: prefilledFreeTicketData
             };
 
             try {
@@ -342,6 +400,7 @@
                 ticketForm.reset();
                 bookingRefInput.value = '';
                 tripTypeSelect.dispatchEvent(new Event('change'));
+                isFreeCheck.dispatchEvent(new Event('change'));
                 updatePassengerForms();
             } catch (error) {
                 console.error("Error saving ticket: ", error);
@@ -434,6 +493,7 @@
                     ${freeDetails ? `
                     <div class="mt-2 pt-2 border-t border-gray-200">
                         <p class="font-bold text-base text-green-600 border-b pb-1 mb-1">معلومات الرحلة المجانية</p>
+                        <p><strong>شركة الطيران:</strong> ${freeDetails.airline_name || 'N/A'}</p>
                         <p><strong>الوجهة:</strong> من ${freeDetails.departure} إلى ${freeDetails.arrival}</p>
                         <p><strong>الاسم:</strong> ${freeDetails.passenger_name || 'N/A'}</p>
                         <p><strong>الجواز:</strong> ${freeDetails.passport_number || 'N/A'} | <strong>انتهاء:</strong> ${freeDetails.passport_expiry || 'N/A'}</p>
