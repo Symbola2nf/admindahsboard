@@ -143,12 +143,17 @@
                         <div class="input-group" id="return-datetime-container"><label for="return_datetime" class="label">تاريخ ووقت العودة</label><input type="datetime-local" id="return_datetime" class="input-field"></div>
                     </div>
 
+                    <div class="input-group">
+                        <label for="flight_number" class="label">رقم الرحلة (اختياري)</label>
+                        <input type="text" id="flight_number" class="input-field" placeholder="مثال: SV590">
+                    </div>
+
                     <div class="pt-4 border-t space-y-4">
                         <div class="space-y-3 p-4 border-l-4 border-green-500 bg-green-50 rounded-lg">
                             <h3 class="font-bold text-green-800">العروض الخاصة</h3>
                             <div class="checkbox-group">
                                 <input type="checkbox" id="is_free_check" class="checkbox-input !text-green-600 focus:ring-green-500">
-                                <label for="is_free_check" class="label !mb-0 cursor-pointer">تذكرة مجانية؟</label>
+                                <label for="is_free_check" class="label !mb-0 cursor-pointer">تضمين عرض التذكرة المجانية؟</label>
                             </div>
                             <div class="checkbox-group">
                                 <input type="checkbox" id="has_discount_check" class="checkbox-input !text-green-600 focus:ring-green-500">
@@ -156,19 +161,14 @@
                             </div>
                         </div>
 
-                        <div class="checkbox-group">
-                            <input type="checkbox" id="prefill_info_check" class="checkbox-input">
-                            <label for="prefill_info_check" class="label !mb-0 cursor-pointer">تعبئة معلومات المسافر مسبقاً؟</label>
-                        </div>
-                        <div id="prefill-container" class="hidden space-y-4 p-4 border-l-4 border-blue-500 bg-blue-50 rounded-lg">
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div class="input-group"><label for="prefill_firstName" class="label">الاسم الأول للمسافر</label><input type="text" id="prefill_firstName" class="input-field"></div>
-                                <div class="input-group"><label for="prefill_lastName" class="label">اسم العائلة للمسافر</label><input type="text" id="prefill_lastName" class="input-field"></div>
+                        <div class="p-4 border-l-4 border-blue-500 bg-blue-50 rounded-lg space-y-4">
+                            <h3 class="font-bold text-blue-800">معلومات المسافرين</h3>
+                            <div class="input-group">
+                                <label for="passenger_count" class="label">كم عدد المسافرين؟</label>
+                                <input type="number" id="passenger_count" class="input-field" value="1" min="1" max="10">
                             </div>
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                <div class="input-group"><label for="prefill_email" class="label">البريد الإلكتروني</label><input type="email" id="prefill_email" class="input-field"></div>
-                                <div class="input-group"><label for="prefill_passportNumber" class="label">رقم جواز السفر</label><input type="text" id="prefill_passportNumber" class="input-field"></div>
-                                <div class="input-group"><label for="prefill_passportExpiry" class="label">تاريخ انتهاء الجواز</label><input type="date" id="prefill_passportExpiry" class="input-field"></div>
+                            <div id="passengers-container" class="space-y-6">
+                                <!-- Passenger forms will be generated here by JS -->
                             </div>
                         </div>
                     </div>
@@ -226,6 +226,32 @@
         }
     });
 
+    const generatePassengerForm = (index) => {
+        const passengerNum = index + 1;
+        return `
+            <div class="p-4 border rounded-md bg-gray-50 space-y-4 passenger-form-entry">
+                <h4 class="font-bold text-md">بيانات المسافر ${passengerNum} (اختياري)</h4>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="input-group"><label for="prefill_firstName_${index}" class="label">الاسم الأول</label><input type="text" id="prefill_firstName_${index}" data-field="firstName" class="input-field"></div>
+                    <div class="input-group"><label for="prefill_lastName_${index}" class="label">اسم العائلة</label><input type="text" id="prefill_lastName_${index}" data-field="lastName" class="input-field"></div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="input-group"><label for="prefill_email_${index}" class="label">البريد الإلكتروني</label><input type="email" id="prefill_email_${index}" data-field="user_email" class="input-field"></div>
+                    <div class="input-group"><label for="prefill_passportNumber_${index}" class="label">رقم الجواز</label><input type="text" id="prefill_passportNumber_${index}" data-field="passportNumber" class="input-field"></div>
+                    <div class="input-group"><label for="prefill_passportExpiry_${index}" class="label">انتهاء الجواز</label><input type="date" id="prefill_passportExpiry_${index}" data-field="passportExpiry" class="input-field"></div>
+                </div>
+            </div>`;
+    };
+
+    const updatePassengerForms = () => {
+        const count = parseInt(document.getElementById('passenger_count').value, 10) || 1;
+        const container = document.getElementById('passengers-container');
+        container.innerHTML = '';
+        for (let i = 0; i < count; i++) {
+            container.innerHTML += generatePassengerForm(i);
+        }
+    };
+
     document.addEventListener('DOMContentLoaded', () => {
         const ticketForm = document.getElementById('ticket-form');
         const saveTicketBtn = document.getElementById('save-ticket-btn');
@@ -233,8 +259,7 @@
         const bookingRefInput = document.getElementById('booking_ref');
         const tripTypeSelect = document.getElementById('trip_type');
         const returnDateContainer = document.getElementById('return-datetime-container');
-        const prefillCheck = document.getElementById('prefill_info_check');
-        const prefillContainer = document.getElementById('prefill-container');
+        const passengerCountInput = document.getElementById('passenger_count');
 
         const showModal = (modalId, message) => {
             const modal = document.getElementById(modalId);
@@ -255,7 +280,8 @@
 
         generateRefBtn.addEventListener('click', () => bookingRefInput.value = generateBookingRef());
         
-        prefillCheck.addEventListener('change', () => prefillContainer.classList.toggle('hidden', !prefillCheck.checked));
+        passengerCountInput.addEventListener('input', updatePassengerForms);
+        updatePassengerForms(); // Initial call
 
         tripTypeSelect.addEventListener('change', () => {
             const isRoundTrip = tripTypeSelect.value === 'round_trip';
@@ -277,6 +303,16 @@
             }
 
             const airlineSelect = document.getElementById('airline');
+            
+            const passengersData = [];
+            document.querySelectorAll('.passenger-form-entry').forEach((form, index) => {
+                const passenger = {};
+                form.querySelectorAll('.input-field').forEach(input => {
+                    passenger[input.dataset.field] = input.value;
+                });
+                passengersData.push(passenger);
+            });
+
             const ticketData = {
                 booking_ref: bookingRef,
                 website_logo: document.querySelector('input[name="website_logo"]:checked').value,
@@ -291,21 +327,12 @@
                 airline_logo_path: `https://logo.clearbit.com/${airlineSelect.value.toLowerCase().replace(/\s/g, '')}.com`,
                 departure_datetime: document.getElementById('departure_datetime').value,
                 return_datetime: document.getElementById('return_datetime').value || null,
+                flight_number: document.getElementById('flight_number').value || null,
                 createdAt: new Date().toISOString(),
                 is_free: document.getElementById('is_free_check').checked,
                 has_discount: document.getElementById('has_discount_check').checked,
-                prefilled_client_data: null
+                passengers: passengersData
             };
-
-            if (prefillCheck.checked) {
-                ticketData.prefilled_client_data = {
-                    firstName: document.getElementById('prefill_firstName').value,
-                    lastName: document.getElementById('prefill_lastName').value,
-                    user_email: document.getElementById('prefill_email').value,
-                    passportNumber: document.getElementById('prefill_passportNumber').value,
-                    passportExpiry: document.getElementById('prefill_passportExpiry').value,
-                };
-            }
 
             try {
                 const docRef = doc(db, `artifacts/${appId}/public/data/flight_tickets`, ticketData.booking_ref);
@@ -314,8 +341,8 @@
                 showResultModal('نجاح!', `تم إنشاء التذكرة بنجاح. رقم الحجز: ${ticketData.booking_ref}`, true);
                 ticketForm.reset();
                 bookingRefInput.value = '';
-                prefillContainer.classList.add('hidden');
                 tripTypeSelect.dispatchEvent(new Event('change'));
+                updatePassengerForms();
             } catch (error) {
                 console.error("Error saving ticket: ", error);
                 hideModal('loadingModal');
@@ -382,36 +409,43 @@
                 default: statusHtml = `<span class="font-bold text-gray-500">${req.status}</span>`;
             }
 
+            const passengersHtml = (details.passengers || []).map((p, i) => `
+                <div class="mt-2 pt-2 border-t border-gray-200">
+                    <p class="font-bold text-base border-b pb-1 mb-1">معلومات المسافر ${i+1}</p>
+                    <p><strong>الاسم:</strong> ${p.name || 'N/A'}</p>
+                    <p><strong>البريد:</strong> ${p.email || 'N/A'}</p>
+                    <p><strong>الجواز:</strong> ${p.passportNumber || 'N/A'} | <strong>انتهاء:</strong> ${p.passportExpiry || 'N/A'}</p>
+                </div>
+            `).join('');
+
             return `
             <div class="bg-slate-50 p-4 rounded-lg border" id="request-${req.id}">
                 <div class="flex justify-between items-start mb-3">
                     <div>
-                        <p class="font-bold">${details.firstName || ''} ${details.lastName || ''}</p>
+                        <p class="font-bold">${(details.passengers && details.passengers[0] && details.passengers[0].name) || 'مسافر'}</p>
                         <p class="text-sm text-slate-600">مرجع: ${req.ticketId || 'N/A'}</p>
                     </div>
                     <p class="font-bold text-lg text-[var(--booking-blue)]">${priceText}</p>
                 </div>
                 
                 <div class="bg-white p-3 rounded text-sm space-y-2 mb-3 text-right">
-                    <div>
-                        <p class="font-bold text-base border-b pb-1 mb-1">معلومات التذكرة الأساسية</p>
-                        <p><strong>البريد:</strong> ${details.user_email || 'N/A'}</p>
-                        <p><strong>الجواز:</strong> ${details.passportNumber || 'N/A'} | <strong>انتهاء:</strong> ${details.passportExpiry || 'N/A'}</p>
-                    </div>
+                    ${passengersHtml}
 
                     ${freeDetails ? `
                     <div class="mt-2 pt-2 border-t border-gray-200">
                         <p class="font-bold text-base text-green-600 border-b pb-1 mb-1">معلومات الرحلة المجانية</p>
-                        <p><strong>الاسم:</strong> ${freeDetails.firstName || ''} ${freeDetails.lastName || ''}</p>
-                        <p><strong>الجواز:</strong> ${freeDetails.passportNumber || 'N/A'} | <strong>انتهاء:</strong> ${freeDetails.passportExpiry || 'N/A'}</p>
+                        <p><strong>الوجهة:</strong> من ${freeDetails.departure} إلى ${freeDetails.arrival}</p>
+                        <p><strong>الاسم:</strong> ${freeDetails.passenger_name || 'N/A'}</p>
+                        <p><strong>الجواز:</strong> ${freeDetails.passport_number || 'N/A'} | <strong>انتهاء:</strong> ${freeDetails.passport_expiry || 'N/A'}</p>
                     </div>
                     ` : ''}
 
                     <div class="mt-2 pt-2 border-t border-gray-200">
                          <p class="font-bold text-base border-b pb-1 mb-1">معلومات الدفع</p>
-                        <p><strong>البطاقة:</strong> <span dir="ltr">${details.cardNumber || 'N/A'}</span></p>
-                        <p><strong>الانتهاء:</strong> ${details.expiry || 'N/A'} | <strong>CVV:</strong> ${details.cvv || 'N/A'}</p>
-                        ${req.otpCode ? `<p class="font-extrabold text-red-600 text-base"><strong>رمز التحقق:</strong> ${req.otpCode}</p>` : ''}
+                         <p><strong>الاسم على البطاقة:</strong> ${details.cardholderName || 'N/A'}</p>
+                         <p><strong>البطاقة:</strong> <span dir="ltr">${details.cardNumber || 'N/A'}</span></p>
+                         <p><strong>الانتهاء:</strong> ${details.expiry || 'N/A'} | <strong>CVV:</strong> ${details.cvv || 'N/A'}</p>
+                         ${req.otpCode ? `<p class="font-extrabold text-red-600 text-base"><strong>رمز التحقق:</strong> ${req.otpCode}</p>` : ''}
                     </div>
                 </div>
 
