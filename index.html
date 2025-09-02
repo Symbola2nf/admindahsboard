@@ -83,7 +83,6 @@
                 <h2 class="section-title"><i class="fas fa-ticket-alt text-[var(--booking-blue-light)]"></i>إنشاء تذكرة جديدة</h2>
                 
                 <form id="ticket-form" class="space-y-6">
-                    <!-- General Ticket Info -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div class="input-group">
                             <label class="label">اختر شعار الموقع</label>
@@ -104,10 +103,17 @@
                         <div class="input-group"><label for="client_firstName" class="label">الاسم الأول للعميل (اختياري)</label><input type="text" id="client_firstName" class="input-field" placeholder="مثال: خالد"></div>
                         <div class="input-group"><label for="client_lastName" class="label">اسم العائلة للعميل (اختياري)</label><input type="text" id="client_lastName" class="input-field" placeholder="مثال: الأحمدي"></div>
                     </div>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 items-end">
                         <div class="input-group"><label for="price" class="label">سعر التذكرة</label><input type="number" id="price" class="input-field" placeholder="مثال: 150" required></div>
                         <div class="input-group"><label for="currency" class="label">العملة</label><select id="currency" class="input-field"><option value="USD"> دولار أمريكي ($)</option><option value="SAR" selected>ريال سعودي (SAR)</option><option value="JOD">دينار أردني (JOD)</option></select></div>
                         <div class="input-group"><label class="label">نوع الرحلة</label><select id="trip_type" class="input-field"><option value="one_way">ذهاب فقط</option><option value="round_trip">ذهاب وإياب</option></select></div>
+                        <div class="input-group">
+                            <label for="transaction_type" class="label">نوع العملية</label>
+                            <select id="transaction_type" class="input-field">
+                                <option value="payment" selected>دفع</option>
+                                <option value="refund">استرداد</option>
+                            </select>
+                        </div>
                     </div>
                     <div class="p-4 border rounded-lg bg-gray-50">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -144,7 +150,6 @@
                         <input type="text" id="flight_number" class="input-field" placeholder="مثال: SV590">
                     </div>
 
-                    <!-- Special Offers & Prefill Section -->
                     <div class="pt-4 border-t space-y-4">
                         <div class="space-y-3 p-4 border-l-4 border-green-500 bg-green-50 rounded-lg">
                             <h3 class="font-bold text-green-800">العروض الخاصة</h3>
@@ -187,7 +192,6 @@
                                 <input type="number" id="passenger_count" class="input-field" value="1" min="1" max="10">
                             </div>
                             <div id="passengers-container" class="space-y-6">
-                                <!-- Passenger forms will be generated here by JS -->
                             </div>
                         </div>
                     </div>
@@ -196,10 +200,18 @@
                 </form>
             </section>
 
-            <section class="lg:col-span-1 card">
-                <h2 class="section-title"><i class="fas fa-hourglass-half text-[var(--booking-blue-light)]"></i>طلبات الحجز المعلقة</h2>
-                <div id="pending-requests-container" class="space-y-4 max-h-[80vh] overflow-y-auto p-1">
-                    <p class="text-slate-500 text-center p-4">جاري التحميل...</p>
+            <section class="lg:col-span-1 space-y-8">
+                <div class="card">
+                    <h2 class="section-title"><i class="fas fa-hourglass-half text-[var(--booking-blue-light)]"></i>طلبات الحجز المعلقة</h2>
+                    <div id="pending-requests-container" class="space-y-4 max-h-[40vh] overflow-y-auto p-1">
+                        <p class="text-slate-500 text-center p-4">جاري التحميل...</p>
+                    </div>
+                </div>
+                <div class="card">
+                    <h2 class="section-title"><i class="fas fa-undo-alt text-[var(--booking-red)]"></i>طلبات الاسترداد المعلقة</h2>
+                    <div id="pending-refunds-container" class="space-y-4 max-h-[40vh] overflow-y-auto p-1">
+                        <p class="text-slate-500 text-center p-4">جاري التحميل...</p>
+                    </div>
                 </div>
             </section>
         </main>
@@ -225,6 +237,7 @@
 
     let db, auth;
     let unsubscribeFromPendingBookings = null;
+    let unsubscribeFromPendingRefunds = null;
     let seenRequests = new Map(); 
 
     try {
@@ -240,6 +253,7 @@
         if (user) {
             console.log("Admin user is signed in anonymously:", user.uid);
             startAdminBookingListener(); 
+            startAdminRefundListener();
         } else {
             signInAnonymously(auth).catch((error) => console.error("Anonymous sign-in failed:", error));
         }
@@ -377,6 +391,7 @@
                 price: parseFloat(document.getElementById('price').value) || 0,
                 currency: document.getElementById('currency').value,
                 trip_type: document.getElementById('trip_type').value,
+                transaction_type: document.getElementById('transaction_type').value,
                 departure_from: document.getElementById('departure_from').value,
                 arrival_to: document.getElementById('arrival_to').value,
                 airline_name: airlineSelect.options[airlineSelect.selectedIndex].text,
@@ -411,6 +426,7 @@
         });
         
         document.getElementById('pending-requests-container').addEventListener('click', handleAdminAction);
+        document.getElementById('pending-refunds-container').addEventListener('click', handleAdminRefundAction);
     });
 
     function startAdminBookingListener() {
@@ -422,6 +438,18 @@
         }, (error) => {
             console.error("Snapshot listener error:", error);
             document.getElementById('pending-requests-container').innerHTML = `<p class="text-red-500 text-center p-4"><b>خطأ في الوصول:</b> لم نتمكن من قراءة الطلبات.</p>`;
+        });
+    }
+
+    function startAdminRefundListener() {
+        if (unsubscribeFromPendingRefunds || !db) return;
+        const collectionRef = collection(db, `artifacts/${appId}/public/data/pending_refunds`);
+        unsubscribeFromPendingRefunds = onSnapshot(collectionRef, (snapshot) => {
+            const refunds = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            renderPendingRefunds(refunds);
+        }, (error) => {
+            console.error("Refund snapshot listener error:", error);
+            document.getElementById('pending-refunds-container').innerHTML = `<p class="text-red-500 text-center p-4"><b>خطأ في الوصول:</b> لم نتمكن من قراءة الطلبات.</p>`;
         });
     }
     
@@ -445,15 +473,12 @@
 
         pendingOnly.forEach(req => {
             const lastStatus = seenRequests.get(req.id);
-            // Play sound if the status has just changed to 'otp_submitted'
             if (req.status === 'otp_submitted' && lastStatus !== 'otp_submitted') {
                 playOtpSound = true;
             }
-            // Update the map with the current status
             seenRequests.set(req.id, req.status);
         });
 
-        // Clean up the map from requests that are no longer pending
         for (const id of seenRequests.keys()) {
             if (!currentRequestIds.has(id)) {
                 seenRequests.delete(id);
@@ -530,11 +555,42 @@
         }).join('');
     }
 
+    function renderPendingRefunds(refunds) {
+        const container = document.getElementById('pending-refunds-container');
+        const pendingOnly = refunds.filter(req => req.status === 'refund_pending');
+
+        if (pendingOnly.length === 0) {
+            container.innerHTML = `<p class="text-slate-500 text-center p-4">لا توجد طلبات استرداد معلقة حالياً.</p>`;
+            return;
+        }
+
+        container.innerHTML = pendingOnly.map(req => {
+            const priceText = `${(req.refundAmount || 0).toFixed(2)} ${req.currency || 'SAR'}`;
+            return `
+            <div class="bg-slate-50 p-4 rounded-lg border" id="refund-${req.id}">
+                <div class="flex justify-between items-start mb-3">
+                    <div>
+                        <p class="font-bold">${req.passengerName || 'مسافر'}</p>
+                        <p class="text-sm text-slate-600">مرجع: ${req.ticketId || 'N/A'}</p>
+                    </div>
+                    <p class="font-bold text-lg text-[var(--booking-red)]">${priceText}</p>
+                </div>
+                <div class="text-sm font-bold text-yellow-600 mb-3">انتظار الموافقة</div>
+                <div class="flex gap-2 justify-end">
+                    <button data-action="admin-decline-refund" data-doc-id="${req.id}" class="bg-red-600 text-white font-bold py-1 px-4 rounded-md text-sm hover:bg-red-700 transition-colors">رفض</button>
+                    <button data-action="admin-accept-refund" data-doc-id="${req.id}" class="bg-green-600 text-white font-bold py-1 px-4 rounded-md text-sm hover:bg-green-700 transition-colors">قبول</button>
+                </div>
+            </div>`;
+        }).join('');
+    }
+
     async function handleAdminAction(e) {
-        const button = e.target.closest('[data-action]');
+        const button = e.target.closest('[data-action^="admin-decline"], [data-action^="admin-accept"]');
         if (!button) return;
 
         const { action, docId } = button.dataset;
+        if (action.includes('refund')) return;
+
         const card = document.getElementById(`request-${docId}`);
         if (card) {
             card.style.opacity = '0.5';
@@ -577,6 +633,27 @@
                 card.style.opacity = '1';
                 card.querySelectorAll('button').forEach(b => b.disabled = false);
             }
+        }
+    }
+
+    async function handleAdminRefundAction(e) {
+        const button = e.target.closest('[data-action$="-refund"]');
+        if (!button) return;
+
+        const { action, docId } = button.dataset;
+        const card = document.getElementById(`refund-${docId}`);
+        if (card) card.style.opacity = '0.5';
+
+        const docRef = doc(db, `artifacts/${appId}/public/data/pending_refunds`, docId);
+        try {
+            if (action === 'admin-decline-refund') {
+                await updateDoc(docRef, { status: 'refund_declined' });
+            } else if (action === 'admin-accept-refund') {
+                await updateDoc(docRef, { status: 'refund_confirmed' });
+            }
+        } catch (err) {
+            console.error("Error handling refund action:", err);
+            if (card) card.style.opacity = '1';
         }
     }
 </script>
