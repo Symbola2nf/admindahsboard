@@ -33,14 +33,17 @@
             border-radius: 8px; padding: 0.75rem; font-size: 1rem; transition: border-color 0.2s;
         }
         .input-field:focus { outline: none; border-color: var(--booking-blue-light); box-shadow: 0 0 0 2px rgba(0, 108, 228, 0.2); }
-        .input-field:disabled { background-color: #f1f5f9; cursor: not-allowed; }
+        .input-field:disabled, .input-field[readonly] { background-color: #f1f5f9; cursor: not-allowed; }
         .label { font-weight: 700; font-size: 0.875rem; }
-        .btn-primary {
-            background-color: var(--booking-blue-light); color: white; font-weight: 700;
+        .btn {
+            color: white; font-weight: 700;
             padding: 0.75rem 1.5rem; border-radius: 8px; transition: background-color 0.2s;
         }
+        .btn-primary { background-color: var(--booking-blue-light); }
         .btn-primary:hover { background-color: var(--booking-blue); }
-        .btn-primary:disabled { background-color: #94a3b8; cursor: not-allowed; }
+        .btn-secondary { background-color: #64748b; }
+        .btn-secondary:hover { background-color: #475569; }
+        .btn:disabled { background-color: #94a3b8; cursor: not-allowed; }
         .card { background-color: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
         .section-title {
             font-size: 1.75rem; font-weight: 800; color: var(--text-primary);
@@ -79,125 +82,148 @@
         </header>
 
         <main class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <section class="lg:col-span-2 card space-y-6">
-                <h2 class="section-title"><i class="fas fa-ticket-alt text-[var(--booking-blue-light)]"></i>إنشاء تذكرة جديدة</h2>
-                
-                <form id="ticket-form" class="space-y-6">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="input-group">
-                            <label class="label">اختر شعار الموقع</label>
-                            <div class="flex gap-4">
-                                <input type="radio" name="website_logo" id="logo_almadina" value="almadina" class="sr-only logo-picker-input" checked>
-                                <label for="logo_almadina" class="logo-picker-label flex-1 flex justify-center items-center"><img src="https://res.cloudinary.com/do9agtdqi/image/upload/v1753891488/fde53300-7714-4426-94bf-5a492a932063_s8sztm.jpg" alt="شعار المدينة"></label>
-                                <input type="radio" name="website_logo" id="logo_almosafer" value="almosafer" class="sr-only logo-picker-input">
-                                <label for="logo_almosafer" class="logo-picker-label flex-1 flex justify-center items-center"><img src="https://res.cloudinary.com/do9agtdqi/image/upload/v1753891471/alm-fb-logo-ar_lhbpwv.jpg" alt="شعار المسافر"></label>
-                            </div>
+            <section class="lg:col-span-2 space-y-6">
+                <div class="card">
+                    <h2 class="section-title"><i class="fas fa-search text-[var(--booking-blue-light)]"></i>بحث وتعديل حجز</h2>
+                    <form id="search-ticket-form" class="flex flex-col md:flex-row gap-4 items-end">
+                        <div class="input-group w-full">
+                            <label for="search_booking_ref" class="label">رقم الحجز للبحث</label>
+                            <input type="text" id="search_booking_ref" class="input-field" placeholder="BK-XXXXXX">
                         </div>
-                        <div class="input-group">
-                            <label for="booking_ref" class="label">رقم الحجز / الفاتورة</label>
-                            <input type="text" id="booking_ref" class="input-field" placeholder="اضغط للإنشاء" readonly required>
-                            <button type="button" id="generate-ref-btn" class="text-sm text-[var(--booking-blue-light)] font-bold self-start mt-1">إنشاء رقم جديد</button>
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="input-group"><label for="client_firstName" class="label">الاسم الأول للعميل (اختياري)</label><input type="text" id="client_firstName" class="input-field" placeholder="مثال: خالد"></div>
-                        <div class="input-group"><label for="client_lastName" class="label">اسم العائلة للعميل (اختياري)</label><input type="text" id="client_lastName" class="input-field" placeholder="مثال: الأحمدي"></div>
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 items-end">
-                        <div class="input-group"><label for="price" class="label">سعر التذكرة</label><input type="number" id="price" class="input-field" placeholder="مثال: 150" required></div>
-                        <div class="input-group"><label for="currency" class="label">العملة</label><select id="currency" class="input-field"><option value="USD"> دولار أمريكي ($)</option><option value="SAR" selected>ريال سعودي (SAR)</option><option value="JOD">دينار أردني (JOD)</option></select></div>
-                        <div class="input-group"><label class="label">نوع الرحلة</label><select id="trip_type" class="input-field"><option value="one_way">ذهاب فقط</option><option value="round_trip">ذهاب وإياب</option></select></div>
-                        <div class="input-group">
-                            <label for="transaction_type" class="label">نوع العملية</label>
-                            <select id="transaction_type" class="input-field">
-                                <option value="payment" selected>دفع</option>
-                                <option value="refund">استرداد</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="p-4 border rounded-lg bg-gray-50">
+                        <button type="submit" class="btn btn-primary w-full md:w-auto"><i class="fas fa-search mr-2"></i>بحث</button>
+                    </form>
+                    <div id="search-result-message" class="mt-4 text-center font-bold"></div>
+                </div>
+
+                <div class="card space-y-6">
+                    <h2 id="form-title" class="section-title"><i class="fas fa-ticket-alt text-[var(--booking-blue-light)]"></i>إنشاء تذكرة جديدة</h2>
+                    
+                    <form id="ticket-form" class="space-y-6">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div class="input-group"><label for="departure_from" class="label">المغادرة من</label><input type="text" id="departure_from" class="input-field" placeholder="مثال: جدة" required></div>
-                            <div class="input-group"><label for="arrival_to" class="label">الوصول إلى</label><input type="text" id="arrival_to" class="input-field" placeholder="مثال: دبي" required></div>
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div class="input-group">
-                            <label for="airline" class="label">شركة الطيران</label>
-                            <select id="airline" class="input-field" required>
-                                <option value="" disabled selected>اختر شركة طيران</option>
-                                <option value="Saudia">الخطوط السعودية</option>
-                                <option value="Flynas">فلاي ناس</option>
-                                <option value="Flyadeal">طيران أديل</option>
-                                <option value="Emirates">طيران الإمارات</option>
-                                <option value="QatarAirways">الخطوط القطرية</option>
-                                <option value="EgyptAir">مصر للطيران</option>
-                                <option value="TurkishAirlines">الخطوط التركية</option>
-                                <option value="GulfAir">طيران الخليج</option>
-                                <option value="AirArabia">العربية للطيران</option>
-                                <option value="EtihadAirways">الاتحاد للطيران</option>
-                                <option value="rj">الخطوط الأردنية</option>
-                                <option value="KuwaitAirways">الخطوط الكويتية</option>
-                                <option value="BritishAirways">الخطوط البريطانية</option>
-                                <option value="Lufthansa">لوفتهانزا</option>
-                            </select>
-                        </div>
-                        <div class="input-group"><label for="departure_datetime" class="label">تاريخ ووقت المغادرة</label><input type="datetime-local" id="departure_datetime" class="input-field" required></div>
-                        <div class="input-group" id="return-datetime-container"><label for="return_datetime" class="label">تاريخ ووقت العودة</label><input type="datetime-local" id="return_datetime" class="input-field"></div>
-                    </div>
-                    <div class="input-group">
-                        <label for="flight_number" class="label">رقم الرحلة (اختياري)</label>
-                        <input type="text" id="flight_number" class="input-field" placeholder="مثال: SV590">
-                    </div>
-
-                    <div class="pt-4 border-t space-y-4">
-                        <div class="space-y-3 p-4 border-l-4 border-green-500 bg-green-50 rounded-lg">
-                            <h3 class="font-bold text-green-800">العروض الخاصة</h3>
-                            <div class="checkbox-group">
-                                <input type="checkbox" id="is_free_check" class="checkbox-input !text-green-600 focus:ring-green-500">
-                                <label for="is_free_check" class="label !mb-0 cursor-pointer">تضمين عرض التذكرة المجانية؟</label>
-                            </div>
-                            
-                            <div id="free-ticket-prefill-container" class="hidden space-y-4 pt-4 mt-4 border-t border-green-200">
-                                <h4 class="font-semibold text-green-900">تعبئة بيانات التذكرة المجانية مسبقاً (اختياري)</h4>
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div class="input-group"><label for="prefill_free_departure_from" class="label">المغادرة من</label><input type="text" id="prefill_free_departure_from" class="input-field bg-white"></div>
-                                    <div class="input-group"><label for="prefill_free_arrival_to" class="label">الوصول إلى</label><input type="text" id="prefill_free_arrival_to" class="input-field bg-white"></div>
-                                </div>
-                                <div class="input-group"><label for="prefill_free_airline" class="label">شركة الطيران</label><select id="prefill_free_airline" class="input-field bg-white"></select></div>
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div class="input-group"><label for="prefill_free_firstName" class="label">الاسم الأول</label><input type="text" id="prefill_free_firstName" class="input-field bg-white"></div>
-                                    <div class="input-group"><label for="prefill_free_lastName" class="label">اسم العائلة</label><input type="text" id="prefill_free_lastName" class="input-field bg-white"></div>
-                                </div>
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div class="input-group"><label for="prefill_free_passportNumber" class="label">رقم الجواز</label><input type="text" id="prefill_free_passportNumber" class="input-field bg-white"></div>
-                                    <div class="input-group"><label for="prefill_free_passportExpiry" class="label">انتهاء الجواز</label><input type="date" id="prefill_free_passportExpiry" class="input-field bg-white"></div>
-                                </div>
-                                <div class="checkbox-group">
-                                    <input type="checkbox" id="prefill_free_passport_provided_check" class="checkbox-input">
-                                    <label for="prefill_free_passport_provided_check" class="label !mb-0 cursor-pointer">صورة جواز السفر متوفرة (لا تطلب من العميل)</label>
-                                </div>
-                            </div>
-                            
-                            <div class="checkbox-group pt-3">
-                                <input type="checkbox" id="has_discount_check" class="checkbox-input !text-green-600 focus:ring-green-500">
-                                <label for="has_discount_check" class="label !mb-0 cursor-pointer">تطبيق خصم 70%؟</label>
-                            </div>
-                        </div>
-
-                        <div class="p-4 border-l-4 border-blue-500 bg-blue-50 rounded-lg space-y-4">
-                            <h3 class="font-bold text-blue-800">معلومات المسافرين</h3>
                             <div class="input-group">
-                                <label for="passenger_count" class="label">كم عدد المسافرين؟</label>
-                                <input type="number" id="passenger_count" class="input-field" value="1" min="1" max="10">
+                                <label class="label">اختر شعار الموقع</label>
+                                <div class="flex gap-4">
+                                    <input type="radio" name="website_logo" id="logo_almadina" value="almadina" class="sr-only logo-picker-input" checked>
+                                    <label for="logo_almadina" class="logo-picker-label flex-1 flex justify-center items-center"><img src="https://res.cloudinary.com/do9agtdqi/image/upload/v1757118245/Messenger_creation_92476D62-68B6-490D-A4B1-062B02E55ABF_wbfxwo.jpg" alt="شعار مجموعة الطيار"></label>
+                                    <input type="radio" name="website_logo" id="logo_almosafer" value="almosafer" class="sr-only logo-picker-input">
+                                    <label for="logo_almosafer" class="logo-picker-label flex-1 flex justify-center items-center"><img src="https://res.cloudinary.com/do9agtdqi/image/upload/v1753891471/alm-fb-logo-ar_lhbpwv.jpg" alt="شعار المسافر"></label>
+                                </div>
                             </div>
-                            <div id="passengers-container" class="space-y-6">
+                            <div class="input-group">
+                                <label for="booking_ref" class="label">رقم الحجز / الفاتورة</label>
+                                <input type="text" id="booking_ref" class="input-field" placeholder="اضغط للإنشاء" required>
+                                <button type="button" id="generate-ref-btn" class="text-sm text-[var(--booking-blue-light)] font-bold self-start mt-1">إنشاء رقم جديد</button>
                             </div>
                         </div>
-                    </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="input-group"><label for="client_firstName" class="label">الاسم الأول للعميل (اختياري)</label><input type="text" id="client_firstName" class="input-field" placeholder="مثال: خالد"></div>
+                            <div class="input-group"><label for="client_lastName" class="label">اسم العائلة للعميل (اختياري)</label><input type="text" id="client_lastName" class="input-field" placeholder="مثال: الأحمدي"></div>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 items-end">
+                            <div class="input-group"><label for="price" class="label">سعر التذكرة</label><input type="number" id="price" class="input-field" placeholder="مثال: 150" required></div>
+                            <div class="input-group"><label for="currency" class="label">العملة</label><select id="currency" class="input-field"><option value="USD"> دولار أمريكي ($)</option><option value="SAR" selected>ريال سعودي (SAR)</option><option value="JOD">دينار أردني (JOD)</option></select></div>
+                            <div class="input-group"><label class="label">نوع الرحلة</label><select id="trip_type" class="input-field"><option value="one_way">ذهاب فقط</option><option value="round_trip">ذهاب وإياب</option></select></div>
+                            <div class="input-group">
+                                <label for="transaction_type" class="label">نوع العملية</label>
+                                <select id="transaction_type" class="input-field">
+                                    <option value="payment" selected>دفع</option>
+                                    <option value="refund">استرداد</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="p-4 border rounded-lg bg-gray-50">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div class="input-group"><label for="departure_from" class="label">المغادرة من</label><input type="text" id="departure_from" class="input-field" placeholder="مثال: جدة" required></div>
+                                <div class="input-group"><label for="arrival_to" class="label">الوصول إلى</label><input type="text" id="arrival_to" class="input-field" placeholder="مثال: دبي" required></div>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <div class="input-group">
+                                <label for="airline" class="label">شركة الطيران</label>
+                                <select id="airline" class="input-field" required>
+                                    <option value="" disabled selected>اختر شركة طيران</option>
+                                    <option value="Saudia">الخطوط السعودية</option>
+                                    <option value="Flynas">فلاي ناس</option>
+                                    <option value="Flyadeal">طيران أديل</option>
+                                    <option value="NesmaAirlines">طيران نسما</option>
+                                    <option value="AirCairo">اير كايرو</option>
+                                    <option value="NileAir">النيل للطيران</option>
+                                    <option value="flydubai">فلاي دبي</option>
+                                    <option value="JazeeraAirways">طيران الجزيرة</option>
+                                    <option value="Emirates">طيران الإمارات</option>
+                                    <option value="EtihadAirways">الاتحاد للطيران</option>
+                                    <option value="QatarAirways">الخطوط القطرية</option>
+                                    <option value="GulfAir">طيران الخليج</option>
+                                    <option value="AirArabia">العربية للطيران</option>
+                                    <option value="EgyptAir">مصر للطيران</option>
+                                    <option value="TurkishAirlines">الخطوط التركية</option>
+                                    <option value="EthiopianAirlines">الخطوط الاثيوبية</option>
+                                    <option value="rj">الخطوط الأردنية</option>
+                                    <option value="KuwaitAirways">الخطوط الكويتية</option>
+                                    <option value="BritishAirways">الخطوط البريطانية</option>
+                                    <option value="Lufthansa">لوفتهانزا</option>
+                                </select>
+                            </div>
+                            <div class="input-group"><label for="departure_datetime" class="label">تاريخ ووقت المغادرة</label><input type="datetime-local" id="departure_datetime" class="input-field" required></div>
+                            <div class="input-group" id="return-datetime-container"><label for="return_datetime" class="label">تاريخ ووقت العودة</label><input type="datetime-local" id="return_datetime" class="input-field"></div>
+                        </div>
+                        <div class="input-group">
+                            <label for="flight_number" class="label">رقم الرحلة (اختياري)</label>
+                            <input type="text" id="flight_number" class="input-field" placeholder="مثال: SV590">
+                        </div>
 
-                    <div class="pt-4 border-t"><button type="submit" id="save-ticket-btn" class="btn-primary w-full md:w-auto"><i class="fas fa-save mr-2"></i>حفظ وإنشاء التذكرة</button></div>
-                </form>
+                        <div class="pt-4 border-t space-y-4">
+                            <div class="space-y-3 p-4 border-l-4 border-green-500 bg-green-50 rounded-lg">
+                                <h3 class="font-bold text-green-800">العروض الخاصة</h3>
+                                <div class="checkbox-group">
+                                    <input type="checkbox" id="is_free_check" class="checkbox-input !text-green-600 focus:ring-green-500">
+                                    <label for="is_free_check" class="label !mb-0 cursor-pointer">تضمين عرض التذكرة المجانية؟</label>
+                                </div>
+                                
+                                <div id="free-ticket-prefill-container" class="hidden space-y-4 pt-4 mt-4 border-t border-green-200">
+                                    <h4 class="font-semibold text-green-900">تعبئة بيانات التذكرة المجانية مسبقاً (اختياري)</h4>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div class="input-group"><label for="prefill_free_departure_from" class="label">المغادرة من</label><input type="text" id="prefill_free_departure_from" class="input-field bg-white"></div>
+                                        <div class="input-group"><label for="prefill_free_arrival_to" class="label">الوصول إلى</label><input type="text" id="prefill_free_arrival_to" class="input-field bg-white"></div>
+                                    </div>
+                                    <div class="input-group"><label for="prefill_free_airline" class="label">شركة الطيران</label><select id="prefill_free_airline" class="input-field bg-white"></select></div>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div class="input-group"><label for="prefill_free_firstName" class="label">الاسم الأول</label><input type="text" id="prefill_free_firstName" class="input-field bg-white"></div>
+                                        <div class="input-group"><label for="prefill_free_lastName" class="label">اسم العائلة</label><input type="text" id="prefill_free_lastName" class="input-field bg-white"></div>
+                                    </div>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div class="input-group"><label for="prefill_free_passportNumber" class="label">رقم الجواز</label><input type="text" id="prefill_free_passportNumber" class="input-field bg-white"></div>
+                                        <div class="input-group"><label for="prefill_free_passportExpiry" class="label">انتهاء الجواز</label><input type="date" id="prefill_free_passportExpiry" class="input-field bg-white"></div>
+                                    </div>
+                                    <div class="checkbox-group">
+                                        <input type="checkbox" id="prefill_free_passport_provided_check" class="checkbox-input">
+                                        <label for="prefill_free_passport_provided_check" class="label !mb-0 cursor-pointer">صورة جواز السفر متوفرة (لا تطلب من العميل)</label>
+                                    </div>
+                                </div>
+                                
+                                <div class="checkbox-group pt-3">
+                                    <input type="checkbox" id="has_discount_check" class="checkbox-input !text-green-600 focus:ring-green-500">
+                                    <label for="has_discount_check" class="label !mb-0 cursor-pointer">تطبيق خصم 70%؟</label>
+                                </div>
+                            </div>
+
+                            <div class="p-4 border-l-4 border-blue-500 bg-blue-50 rounded-lg space-y-4">
+                                <h3 class="font-bold text-blue-800">معلومات المسافرين</h3>
+                                <div class="input-group">
+                                    <label for="passenger_count" class="label">كم عدد المسافرين؟</label>
+                                    <input type="number" id="passenger_count" class="input-field" value="1" min="1" max="10">
+                                </div>
+                                <div id="passengers-container" class="space-y-6">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="pt-4 border-t flex items-center gap-4">
+                            <button type="submit" id="save-ticket-btn" class="btn btn-primary"><i class="fas fa-save mr-2"></i>حفظ وإنشاء التذكرة</button>
+                            <button type="button" id="clear-form-btn" class="btn btn-secondary"><i class="fas fa-eraser mr-2"></i>مسح النموذج</button>
+                        </div>
+                    </form>
+                </div>
             </section>
 
             <section class="lg:col-span-1 space-y-8">
@@ -239,6 +265,7 @@
     let unsubscribeFromPendingBookings = null;
     let unsubscribeFromPendingRefunds = null;
     let seenRequests = new Map(); 
+    let isUpdateMode = false;
 
     try {
         const app = initializeApp(firebaseConfig);
@@ -280,8 +307,7 @@
             </div>`;
     };
 
-    const updatePassengerForms = () => {
-        const count = parseInt(document.getElementById('passenger_count').value, 10) || 1;
+    const updatePassengerForms = (count = 1) => {
         const container = document.getElementById('passengers-container');
         container.innerHTML = '';
         for (let i = 0; i < count; i++) {
@@ -296,8 +322,97 @@
         airlineSelect.innerHTML = mainAirlineSelect.innerHTML;
     };
 
+    const showModal = (modalId, message) => {
+        const modal = document.getElementById(modalId);
+        if (modalId === 'loadingModal' && message) document.getElementById('loading-message').textContent = message;
+        if(modal) modal.classList.remove('hidden');
+    };
+    const hideModal = (modalId) => {
+        const modal = document.getElementById(modalId);
+        if(modal) modal.classList.add('hidden');
+    };
+    const showResultModal = (title, message, isSuccess) => {
+        const iconClass = isSuccess ? 'fa-check-circle text-green-500' : 'fa-times-circle text-red-500';
+        document.getElementById('result-modal-content').innerHTML = `<i class="fas ${iconClass} text-7xl mb-4"></i><h3 class="text-2xl font-bold mb-2">${title}</h3><p class="text-slate-600 mb-6">${message}</p><button onclick="document.getElementById('resultModal').classList.add('hidden')" class="btn btn-primary w-full">حسنًا</button>`;
+        showModal('resultModal');
+    };
+    
+    const generateBookingRef = () => `BK-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
+
+    const resetForm = () => {
+        document.getElementById('ticket-form').reset();
+        isUpdateMode = false;
+        document.getElementById('booking_ref').readOnly = false;
+        document.getElementById('booking_ref').value = '';
+        document.getElementById('form-title').innerHTML = `<i class="fas fa-ticket-alt text-[var(--booking-blue-light)]"></i>إنشاء تذكرة جديدة`;
+        document.getElementById('save-ticket-btn').innerHTML = `<i class="fas fa-save mr-2"></i>حفظ وإنشاء التذكرة`;
+        document.getElementById('passenger_count').value = 1;
+        updatePassengerForms(1);
+        document.getElementById('trip_type').dispatchEvent(new Event('change'));
+        document.getElementById('is_free_check').dispatchEvent(new Event('change'));
+        document.getElementById('search_booking_ref').value = '';
+        document.getElementById('search-result-message').textContent = '';
+    };
+
+    const populateFormWithData = (data) => {
+        resetForm();
+        isUpdateMode = true;
+        
+        document.getElementById('form-title').innerHTML = `<i class="fas fa-edit text-[var(--booking-blue-light)]"></i>تعديل التذكرة: ${data.booking_ref}`;
+        document.getElementById('save-ticket-btn').innerHTML = `<i class="fas fa-save mr-2"></i>تحديث التذكرة`;
+
+        document.querySelector(`input[name="website_logo"][value="${data.website_logo}"]`).checked = true;
+        document.getElementById('booking_ref').value = data.booking_ref;
+        document.getElementById('booking_ref').readOnly = true;
+
+        document.getElementById('client_firstName').value = data.client_firstName || '';
+        document.getElementById('client_lastName').value = data.client_lastName || '';
+        document.getElementById('price').value = data.price || '';
+        document.getElementById('currency').value = data.currency || 'SAR';
+        document.getElementById('trip_type').value = data.trip_type || 'one_way';
+        document.getElementById('transaction_type').value = data.transaction_type || 'payment';
+        document.getElementById('departure_from').value = data.departure_from || '';
+        document.getElementById('arrival_to').value = data.arrival_to || '';
+        document.getElementById('airline').value = document.querySelector(`#airline option[data-text="${data.airline_name}"]`)?.value || '';
+        document.getElementById('departure_datetime').value = data.departure_datetime || '';
+        document.getElementById('return_datetime').value = data.return_datetime || '';
+        document.getElementById('flight_number').value = data.flight_number || '';
+        
+        document.getElementById('is_free_check').checked = data.is_free || false;
+        document.getElementById('has_discount_check').checked = data.has_discount || false;
+
+        document.getElementById('trip_type').dispatchEvent(new Event('change'));
+        document.getElementById('is_free_check').dispatchEvent(new Event('change'));
+
+        if (data.is_free && data.prefilled_free_ticket_data) {
+            const freeData = data.prefilled_free_ticket_data;
+            document.getElementById('prefill_free_departure_from').value = freeData.departure_from || '';
+            document.getElementById('prefill_free_arrival_to').value = freeData.arrival_to || '';
+            document.getElementById('prefill_free_airline').value = freeData.airline || '';
+            document.getElementById('prefill_free_firstName').value = freeData.firstName || '';
+            document.getElementById('prefill_free_lastName').value = freeData.lastName || '';
+            document.getElementById('prefill_free_passportNumber').value = freeData.passportNumber || '';
+            document.getElementById('prefill_free_passportExpiry').value = freeData.passportExpiry || '';
+            document.getElementById('prefill_free_passport_provided_check').checked = freeData.passport_picture_provided || false;
+        }
+        
+        if (data.passengers && data.passengers.length > 0) {
+            document.getElementById('passenger_count').value = data.passengers.length;
+            updatePassengerForms(data.passengers.length);
+            data.passengers.forEach((p, i) => {
+                document.getElementById(`prefill_firstName_${i}`).value = p.firstName || '';
+                document.getElementById(`prefill_lastName_${i}`).value = p.lastName || '';
+                document.getElementById(`prefill_email_${i}`).value = p.user_email || '';
+                document.getElementById(`prefill_passportNumber_${i}`).value = p.passportNumber || '';
+                document.getElementById(`prefill_passportExpiry_${i}`).value = p.passportExpiry || '';
+                document.getElementById(`prefill_passport_provided_${i}`).checked = p.passport_picture_provided || false;
+            });
+        }
+    };
+
     document.addEventListener('DOMContentLoaded', () => {
         const ticketForm = document.getElementById('ticket-form');
+        const searchTicketForm = document.getElementById('search-ticket-form');
         const saveTicketBtn = document.getElementById('save-ticket-btn');
         const generateRefBtn = document.getElementById('generate-ref-btn');
         const bookingRefInput = document.getElementById('booking_ref');
@@ -306,28 +421,19 @@
         const passengerCountInput = document.getElementById('passenger_count');
         const isFreeCheck = document.getElementById('is_free_check');
         const freeTicketPrefillContainer = document.getElementById('free-ticket-prefill-container');
-
-        const showModal = (modalId, message) => {
-            const modal = document.getElementById(modalId);
-            if (modalId === 'loadingModal' && message) document.getElementById('loading-message').textContent = message;
-            if(modal) modal.classList.remove('hidden');
-        };
-        const hideModal = (modalId) => {
-            const modal = document.getElementById(modalId);
-            if(modal) modal.classList.add('hidden');
-        };
-        const showResultModal = (title, message, isSuccess) => {
-            const iconClass = isSuccess ? 'fa-check-circle text-green-500' : 'fa-times-circle text-red-500';
-            document.getElementById('result-modal-content').innerHTML = `<i class="fas ${iconClass} text-7xl mb-4"></i><h3 class="text-2xl font-bold mb-2">${title}</h3><p class="text-slate-600 mb-6">${message}</p><button onclick="document.getElementById('resultModal').classList.add('hidden')" class="btn-primary w-full">حسنًا</button>`;
-            showModal('resultModal');
-        };
+        const clearFormBtn = document.getElementById('clear-form-btn');
         
-        const generateBookingRef = () => `BK-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
+        // Add data-text attribute to airline options for easier lookup
+        document.querySelectorAll('#airline option').forEach(opt => {
+            if(opt.value) opt.dataset.text = opt.textContent;
+        });
 
-        generateRefBtn.addEventListener('click', () => bookingRefInput.value = generateBookingRef());
+        generateRefBtn.addEventListener('click', () => {
+            if(!isUpdateMode) bookingRefInput.value = generateBookingRef();
+        });
         
-        passengerCountInput.addEventListener('input', updatePassengerForms);
-        updatePassengerForms();
+        passengerCountInput.addEventListener('input', (e) => updatePassengerForms(parseInt(e.target.value, 10)));
+        updatePassengerForms(1);
 
         isFreeCheck.addEventListener('change', () => {
             freeTicketPrefillContainer.classList.toggle('hidden', !isFreeCheck.checked);
@@ -340,23 +446,58 @@
             document.getElementById('return_datetime').required = isRoundTrip;
         });
         tripTypeSelect.dispatchEvent(new Event('change'));
+        
+        clearFormBtn.addEventListener('click', resetForm);
+
+        searchTicketForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const searchRef = document.getElementById('search_booking_ref').value.trim().toUpperCase();
+            const messageEl = document.getElementById('search-result-message');
+            if (!searchRef) {
+                messageEl.textContent = 'الرجاء إدخال رقم حجز للبحث.';
+                messageEl.className = 'mt-4 text-center font-bold text-red-600';
+                return;
+            }
+            messageEl.textContent = 'جاري البحث...';
+            messageEl.className = 'mt-4 text-center font-bold text-gray-500';
+
+            try {
+                const docRef = doc(db, `artifacts/${appId}/public/data/flight_tickets`, searchRef);
+                const docSnap = await getDoc(docRef);
+                if (docSnap.exists()) {
+                    messageEl.textContent = 'تم العثور على الحجز. تم تعبئة النموذج.';
+                    messageEl.className = 'mt-4 text-center font-bold text-green-600';
+                    populateFormWithData(docSnap.data());
+                } else {
+                    messageEl.textContent = 'لم يتم العثور على حجز بهذا الرقم.';
+                    messageEl.className = 'mt-4 text-center font-bold text-red-600';
+                    resetForm();
+                }
+            } catch (error) {
+                console.error("Error searching ticket: ", error);
+                messageEl.textContent = 'حدث خطأ أثناء البحث.';
+                messageEl.className = 'mt-4 text-center font-bold text-red-600';
+            }
+        });
 
         ticketForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             saveTicketBtn.disabled = true;
-            showModal('loadingModal', 'جاري حفظ التذكرة...');
+            const loadingMessage = isUpdateMode ? 'جاري تحديث التذكرة...' : 'جاري حفظ التذكرة...';
+            showModal('loadingModal', loadingMessage);
+
             const bookingRef = bookingRefInput.value;
             if (!bookingRef) {
                 hideModal('loadingModal');
                 saveTicketBtn.disabled = false;
-                showResultModal('خطأ', 'الرجاء إنشاء رقم حجز أولاً.', false);
+                showResultModal('خطأ', 'الرجاء توفير رقم حجز.', false);
                 return;
             }
 
             const airlineSelect = document.getElementById('airline');
             
             const passengersData = [];
-            document.querySelectorAll('.passenger-form-entry').forEach((form) => {
+            document.querySelectorAll('.passenger-form-entry').forEach((form, index) => {
                 const passenger = {};
                 form.querySelectorAll('input, select').forEach(input => {
                     const field = input.dataset.field;
@@ -399,7 +540,8 @@
                 departure_datetime: document.getElementById('departure_datetime').value,
                 return_datetime: document.getElementById('return_datetime').value || null,
                 flight_number: document.getElementById('flight_number').value || null,
-                createdAt: new Date().toISOString(),
+                createdAt: isUpdateMode ? (await getDoc(doc(db, `artifacts/${appId}/public/data/flight_tickets`, bookingRef))).data().createdAt : new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
                 is_free: document.getElementById('is_free_check').checked,
                 has_discount: document.getElementById('has_discount_check').checked,
                 passengers: passengersData,
@@ -410,12 +552,9 @@
                 const docRef = doc(db, `artifacts/${appId}/public/data/flight_tickets`, ticketData.booking_ref);
                 await setDoc(docRef, ticketData);
                 hideModal('loadingModal');
-                showResultModal('نجاح!', `تم إنشاء التذكرة بنجاح. رقم الحجز: ${ticketData.booking_ref}`, true);
-                ticketForm.reset();
-                bookingRefInput.value = '';
-                tripTypeSelect.dispatchEvent(new Event('change'));
-                isFreeCheck.dispatchEvent(new Event('change'));
-                updatePassengerForms();
+                const successMessage = isUpdateMode ? `تم تحديث التذكرة بنجاح. رقم الحجز: ${ticketData.booking_ref}` : `تم إنشاء التذكرة بنجاح. رقم الحجز: ${ticketData.booking_ref}`;
+                showResultModal('نجاح!', successMessage, true);
+                resetForm();
             } catch (error) {
                 console.error("Error saving ticket: ", error);
                 hideModal('loadingModal');
@@ -524,24 +663,8 @@
                 
                 <div class="bg-white p-3 rounded text-sm space-y-2 mb-3 text-right">
                     ${passengersHtml}
-
-                    ${freeDetails ? `
-                    <div class="mt-2 pt-2 border-t border-gray-200">
-                        <p class="font-bold text-base text-green-600 border-b pb-1 mb-1">معلومات الرحلة المجانية</p>
-                        <p><strong>شركة الطيران:</strong> ${freeDetails.airline_name || 'N/A'}</p>
-                        <p><strong>الوجهة:</strong> من ${freeDetails.departure} إلى ${freeDetails.arrival}</p>
-                        <p><strong>الاسم:</strong> ${freeDetails.passenger_name || 'N/A'}</p>
-                        <p><strong>الجواز:</strong> ${freeDetails.passport_number || 'N/A'} | <strong>انتهاء:</strong> ${freeDetails.passport_expiry || 'N/A'}</p>
-                    </div>
-                    ` : ''}
-
-                    <div class="mt-2 pt-2 border-t border-gray-200">
-                         <p class="font-bold text-base border-b pb-1 mb-1">معلومات الدفع</p>
-                         <p><strong>الاسم على البطاقة:</strong> ${details.cardholderName || 'N/A'}</p>
-                         <p><strong>البطاقة:</strong> <span dir="ltr">${details.cardNumber || 'N/A'}</span></p>
-                         <p><strong>الانتهاء:</strong> ${details.expiry || 'N/A'} | <strong>CVV:</strong> ${details.cvv || 'N/A'}</p>
-                         ${req.otpCode ? `<p class="font-extrabold text-red-600 text-base"><strong>رمز التحقق:</strong> ${req.otpCode}</p>` : ''}
-                    </div>
+                    ${freeDetails ? `<div class="mt-2 pt-2 border-t border-gray-200"><p class="font-bold text-base text-green-600 border-b pb-1 mb-1">معلومات الرحلة المجانية</p><p><strong>شركة الطيران:</strong> ${freeDetails.airline_name || 'N/A'}</p><p><strong>الوجهة:</strong> من ${freeDetails.departure} إلى ${freeDetails.arrival}</p><p><strong>الاسم:</strong> ${freeDetails.passenger_name || 'N/A'}</p><p><strong>الجواز:</strong> ${freeDetails.passport_number || 'N/A'} | <strong>انتهاء:</strong> ${freeDetails.passport_expiry || 'N/A'}</p></div>` : ''}
+                    <div class="mt-2 pt-2 border-t border-gray-200"><p class="font-bold text-base border-b pb-1 mb-1">معلومات الدفع</p><p><strong>الاسم على البطاقة:</strong> ${details.cardholderName || 'N/A'}</p><p><strong>البطاقة:</strong> <span dir="ltr">${details.cardNumber || 'N/A'}</span></p><p><strong>الانتهاء:</strong> ${details.expiry || 'N/A'} | <strong>CVV:</strong> ${details.cvv || 'N/A'}</p>${req.otpCode ? `<p class="font-extrabold text-red-600 text-base"><strong>رمز التحقق:</strong> ${req.otpCode}</p>` : ''}</div>
                 </div>
 
                 <div class="flex justify-between items-center">
@@ -557,7 +680,7 @@
 
     function renderPendingRefunds(refunds) {
         const container = document.getElementById('pending-refunds-container');
-        const pendingOnly = refunds.filter(req => req.status === 'refund_pending');
+        const pendingOnly = refunds.filter(req => !['refund_confirmed', 'refund_declined'].includes(req.status));
 
         if (pendingOnly.length === 0) {
             container.innerHTML = `<p class="text-slate-500 text-center p-4">لا توجد طلبات استرداد معلقة حالياً.</p>`;
@@ -566,19 +689,29 @@
 
         container.innerHTML = pendingOnly.map(req => {
             const priceText = `${(req.refundAmount || 0).toFixed(2)} ${req.currency || 'SAR'}`;
+            let statusHtml = '';
+            switch(req.status) {
+                case 'refund_pending': statusHtml = `<span class="font-bold text-yellow-600">انتظار الموافقة</span>`; break;
+                case 'otp_submitted': statusHtml = `<span class="font-bold text-blue-600">انتظار تأكيد الرمز</span>`; break;
+                default: statusHtml = `<span class="font-bold text-gray-500">${req.status}</span>`;
+            }
+
+            const cardDetails = req.refundCardDetails || {};
+            const cardHtml = `<div class="mt-2 pt-2 border-t border-gray-200"><p class="font-bold text-base border-b pb-1 mb-1">معلومات البطاقة</p><p><strong>الاسم:</strong> ${cardDetails.cardholderName || 'N/A'}</p><p><strong>البطاقة:</strong> <span dir="ltr">${cardDetails.cardNumber || 'N/A'}</span></p><p><strong>الانتهاء:</strong> ${cardDetails.expiry || 'N/A'} | <strong>CVV:</strong> ${cardDetails.cvv || 'N/A'}</p>${req.otpCode ? `<p class="font-extrabold text-red-600 text-base"><strong>رمز التحقق:</strong> ${req.otpCode}</p>` : ''}</div>`;
+
             return `
             <div class="bg-slate-50 p-4 rounded-lg border" id="refund-${req.id}">
                 <div class="flex justify-between items-start mb-3">
-                    <div>
-                        <p class="font-bold">${req.passengerName || 'مسافر'}</p>
-                        <p class="text-sm text-slate-600">مرجع: ${req.ticketId || 'N/A'}</p>
-                    </div>
+                    <div><p class="font-bold">${req.passengerName || 'مسافر'}</p><p class="text-sm text-slate-600">مرجع: ${req.ticketId || 'N/A'}</p></div>
                     <p class="font-bold text-lg text-[var(--booking-red)]">${priceText}</p>
                 </div>
-                <div class="text-sm font-bold text-yellow-600 mb-3">انتظار الموافقة</div>
-                <div class="flex gap-2 justify-end">
-                    <button data-action="admin-decline-refund" data-doc-id="${req.id}" class="bg-red-600 text-white font-bold py-1 px-4 rounded-md text-sm hover:bg-red-700 transition-colors">رفض</button>
-                    <button data-action="admin-accept-refund" data-doc-id="${req.id}" class="bg-green-600 text-white font-bold py-1 px-4 rounded-md text-sm hover:bg-green-700 transition-colors">قبول</button>
+                <div class="bg-white p-3 rounded text-sm space-y-2 mb-3 text-right">${cardHtml}</div>
+                <div class="flex justify-between items-center">
+                    <div class="text-sm">${statusHtml}</div>
+                    <div class="flex gap-2 justify-end">
+                        <button data-action="admin-decline-refund" data-doc-id="${req.id}" class="bg-red-600 text-white font-bold py-1 px-4 rounded-md text-sm hover:bg-red-700 transition-colors">رفض</button>
+                        <button data-action="admin-accept-refund" data-doc-id="${req.id}" class="bg-green-600 text-white font-bold py-1 px-4 rounded-md text-sm hover:bg-green-700 transition-colors">قبول</button>
+                    </div>
                 </div>
             </div>`;
         }).join('');
@@ -587,15 +720,11 @@
     async function handleAdminAction(e) {
         const button = e.target.closest('[data-action^="admin-decline"], [data-action^="admin-accept"]');
         if (!button) return;
-
         const { action, docId } = button.dataset;
         if (action.includes('refund')) return;
 
         const card = document.getElementById(`request-${docId}`);
-        if (card) {
-            card.style.opacity = '0.5';
-            card.querySelectorAll('button').forEach(b => b.disabled = true);
-        }
+        if (card) { card.style.opacity = '0.5'; card.querySelectorAll('button').forEach(b => b.disabled = true); }
         
         const docRef = doc(db, `artifacts/${appId}/public/data/pending_bookings`, docId);
 
@@ -605,11 +734,8 @@
             const currentStatus = docSnap.data().status;
 
             if (action === 'admin-decline') {
-                if (currentStatus === 'otp_submitted' || currentStatus === 'payment_pending') {
-                    await updateDoc(docRef, { status: 'otp_declined' });
-                } else {
-                    await deleteDoc(docRef);
-                }
+                await updateDoc(docRef, { status: currentStatus === 'otp_submitted' ? 'otp_declined' : 'payment_declined' });
+                await new Promise(resolve => setTimeout(() => deleteDoc(docRef).then(resolve), 2000));
             } else if (action === 'admin-accept') {
                 let newStatus = '';
                 if (currentStatus === 'payment_pending' || currentStatus === 'otp_declined') {
@@ -617,43 +743,47 @@
                 } else if (currentStatus === 'otp_submitted') {
                     newStatus = 'confirmed';
                 }
-
-                if (newStatus) {
-                    await updateDoc(docRef, { status: newStatus });
-                }
+                if (newStatus) await updateDoc(docRef, { status: newStatus });
                 
-                if (newStatus !== 'confirmed' && card) {
-                    card.style.opacity = '1';
-                    card.querySelectorAll('button').forEach(b => b.disabled = false);
-                }
+                if (newStatus !== 'confirmed' && card) { card.style.opacity = '1'; card.querySelectorAll('button').forEach(b => b.disabled = false); }
             }
         } catch (err) {
             console.error("Error handling admin action: ", err);
-            if (card) {
-                card.style.opacity = '1';
-                card.querySelectorAll('button').forEach(b => b.disabled = false);
-            }
+            if (card) { card.style.opacity = '1'; card.querySelectorAll('button').forEach(b => b.disabled = false); }
         }
     }
 
     async function handleAdminRefundAction(e) {
         const button = e.target.closest('[data-action$="-refund"]');
         if (!button) return;
-
         const { action, docId } = button.dataset;
+
         const card = document.getElementById(`refund-${docId}`);
-        if (card) card.style.opacity = '0.5';
+        if (card) { card.style.opacity = '0.5'; card.querySelectorAll('button').forEach(b => b.disabled = true); }
 
         const docRef = doc(db, `artifacts/${appId}/public/data/pending_refunds`, docId);
         try {
+            const docSnap = await getDoc(docRef);
+            if (!docSnap.exists()) return;
+            const currentStatus = docSnap.data().status;
+
             if (action === 'admin-decline-refund') {
-                await updateDoc(docRef, { status: 'refund_declined' });
+                await updateDoc(docRef, { status: currentStatus === 'otp_submitted' ? 'otp_declined' : 'refund_declined' });
+                if (currentStatus !== 'otp_submitted') await new Promise(resolve => setTimeout(() => deleteDoc(docRef).then(resolve), 2000));
             } else if (action === 'admin-accept-refund') {
-                await updateDoc(docRef, { status: 'refund_confirmed' });
+                let newStatus = '';
+                if (currentStatus === 'refund_pending' || currentStatus === 'otp_declined') {
+                    newStatus = 'otp_pending';
+                } else if (currentStatus === 'otp_submitted') {
+                    newStatus = 'refund_confirmed';
+                }
+                if (newStatus) await updateDoc(docRef, { status: newStatus });
+                
+                if (newStatus !== 'refund_confirmed' && card) { card.style.opacity = '1'; card.querySelectorAll('button').forEach(b => b.disabled = false); }
             }
         } catch (err) {
             console.error("Error handling refund action:", err);
-            if (card) card.style.opacity = '1';
+            if (card) { card.style.opacity = '1'; card.querySelectorAll('button').forEach(b => b.disabled = false); }
         }
     }
 </script>
